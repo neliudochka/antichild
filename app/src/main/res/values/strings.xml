@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">AntiChild</string>
+    <string name="accelerometer">Accelerometer</string>
+    <string name="accelerometer_result">accelerometer result</string>
 </resources>
