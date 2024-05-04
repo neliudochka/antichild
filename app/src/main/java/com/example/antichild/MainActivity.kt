@@ -1,10 +1,13 @@
 package com.example.antichild
 
 import android.annotation.SuppressLint
+import android.hardware.SensorManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Toast
 import com.example.antichild.databinding.ActivityMainBinding
 import com.example.antichild.sensors.AccelerometerSensor
+import kotlin.math.sqrt
 import kotlin.properties.Delegates
 
 class MainActivity : AppCompatActivity() {
@@ -25,6 +28,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     //ui
+    private var isActivated = false;
     private var isSensors = false;
     private var greyColor by Delegates.notNull<Int>()
     private var pinky by Delegates.notNull<Int>()
@@ -35,12 +39,37 @@ class MainActivity : AppCompatActivity() {
         pinky = applicationContext.getColor(R.color.pinky)
         red = applicationContext.getColor(R.color.red)
 
+        binding.startButton.setBackgroundColor(greyColor)
+        binding.startButton.setOnClickListener {
+            if (!isStolen)
+                if(isSensors)
+                    switchActivatedButton()
+                else
+                    Toast.makeText(this, "Firstly, turn on the sensors", Toast.LENGTH_SHORT).show()
+        }
+
         binding.onOffSensors.setBackgroundColor(greyColor)
         binding.onOffSensors.setOnClickListener {
-            switchOffSensors()
+            if (!isStolen)
+                switchOffSensors()
+        }
+
+        binding.reset.setBackgroundColor(red)
+        binding.reset.setOnClickListener{
+            isStolen = false
+            binding.movementDetectionTextview.text = "No movement detected"
         }
     }
 
+    private fun switchActivatedButton() {
+        if(isActivated) {
+            isActivated = false
+            binding.startButton.setBackgroundColor(greyColor)
+        } else {
+            isActivated = true
+            binding.startButton.setBackgroundColor(pinky)
+        }
+    }
     private fun switchOffSensors() {
         if(isSensors) {
             isSensors = false
@@ -64,11 +93,38 @@ class MainActivity : AppCompatActivity() {
         accelerometerSensor.setOnSensorValuesChangedListener { a ->
             val result: String? = java.lang.String.format("x: %.4f   y: %.4f   z: %.4f", a[0], a[1], a[2])
             binding.accRes.text = result
-            //перевірка руху
+            if(isActivated && !isStolen) {
+                checkMotion(a.toList())
+            }
         }
     }
 
     private fun killSensors() {
         accelerometerSensor.stopListening()
+    }
+
+
+    //Movement detection
+    private var mAccel = 0.00f;
+    private var mAccelCurrent = SensorManager.GRAVITY_EARTH;
+    private var mAccelLast = SensorManager.GRAVITY_EARTH;
+
+    private var isStolen = false
+
+    private fun checkMotion(values: List<Float>) {
+        val x: Float = values[0]
+        val y: Float = values[1]
+        val z: Float = values[2]
+        mAccelLast = mAccelCurrent
+        //загальна велечина прискорення =  √x^2+y^2+z^2
+        mAccelCurrent = sqrt(((x * x + y * y + z * z).toDouble())).toFloat()
+        val delta: Float = mAccelLast - mAccelCurrent
+        mAccel = mAccel * 0.9f + delta
+        if (mAccel > 0.5) {
+            isStolen = true
+            binding.movementDetectionTextview.text = "Movement detected"
+            switchOffSensors()
+            switchActivatedButton()
+        }
     }
 }

@@ -2,4 +2,8 @@
     <string name="app_name">AntiChild</string>
     <string name="accelerometer">Accelerometer</string>
     <string name="accelerometer_result">"x: 0.0   y: 0.0   z: 0.0"</string>
+    <string name="activate_the_motion_alarm">Activate the motion alarm</string>
+    <string name="reset">reset</string>
+    <string name="no_motion_detected">no motion detected</string>
+    <string name="no_movement_detected">No movement detected</string>
 </resources>
