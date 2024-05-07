@@ -4,10 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="20dp"
     tools:context=".MainActivity">
 
     <Button
-        android:id="@+id/start_button"
+        android:id="@+id/motion_alarm_activation_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/activate_the_motion_alarm"
@@ -25,7 +26,7 @@
         app:layout_constraintBottom_toTopOf="@+id/acc_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/start_button" />
+        app:layout_constraintTop_toBottomOf="@+id/motion_alarm_activation_button" />
 
     <TextView
         android:id="@+id/acc_text"
@@ -35,7 +36,7 @@
         android:layout_marginTop="276dp"
         android:text="@string/accelerometer"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/start_button" />
+        app:layout_constraintTop_toBottomOf="@+id/motion_alarm_activation_button" />
 
     <TextView
         android:id="@+id/acc_res"
@@ -51,7 +52,7 @@
         android:id="@+id/on_off_sensors"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="on/off sensors"
+        android:text="@string/activate_sensors"
         app:layout_constraintBottom_toTopOf="@id/reset"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
