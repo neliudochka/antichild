@@ -1,5 +1,6 @@
 package com.example.antichild
 
+import android.content.Intent
 import android.hardware.SensorManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -58,6 +59,7 @@ class MainActivity : AppCompatActivity() {
         binding.reset.setOnClickListener{
             isStolen = false
             binding.movementDetectionTextview.text = resources.getText(R.string.no_movement_detected)
+            stopMusicService()
         }
     }
 
@@ -123,8 +125,20 @@ class MainActivity : AppCompatActivity() {
         if (mAccel > 0.5) {
             isStolen = true
             binding.movementDetectionTextview.text = resources.getText(R.string.movement_detected)
+            startMusicService()
             switchOffSensors()
             switchActivatedButton()
         }
     }
+
+    //music Service
+    private fun startMusicService() {
+        val intent = Intent(this, MusicService::class.java)
+        startService(intent)
+    }
+
+    private fun stopMusicService() {
+        stopService(Intent(this, MusicService::class.java))
+    }
+
 }
