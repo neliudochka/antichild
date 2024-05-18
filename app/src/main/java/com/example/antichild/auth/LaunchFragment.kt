@@ -17,6 +17,22 @@ class LaunchFragment : Fragment() {
     ): View? {
         binding = FragmentLaunchBinding.inflate(inflater, container, false)
 
+        binding.signIn.setOnClickListener {
+            parentFragmentManager
+                .beginTransaction()
+                .replace(R.id.fragment_container, SignInFragment.newInstance())
+                .addToBackStack(null)
+                .commit()
+        }
+
+        binding.signUp.setOnClickListener {
+            parentFragmentManager
+                .beginTransaction()
+                .replace(R.id.fragment_container, SignUpFragment.newInstance())
+                .addToBackStack(null)
+                .commit()
+        }
+
         return binding.root
     }
 
