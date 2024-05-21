@@ -5,8 +5,10 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
@@ -24,6 +26,7 @@ class MusicService : Service() {
         mediaPlayer = MediaPlayer.create(this, R.raw.sig)
         mediaPlayer.isLooping = true
         audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
+        registerVolumeReceiver()
 
         createNotificationChannel()
     }
@@ -31,6 +34,7 @@ class MusicService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startForeground(1, createNotification())
         mediaPlayer.start()
+        resetVolume()
         return START_STICKY
     }
 
@@ -41,6 +45,8 @@ class MusicService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         mediaPlayer.stop()
+
+        unregisterVolumeReceiver()
     }
 
     private fun createNotification(): Notification {
@@ -76,5 +82,28 @@ class MusicService : Service() {
         val notificationManager: NotificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
+    }
+
+    private fun registerVolumeReceiver() {
+        val filter = IntentFilter()
+        filter.addAction("android.media.VOLUME_CHANGED_ACTION")
+        registerReceiver(volumeReceiver, filter)
+    }
+
+    private fun unregisterVolumeReceiver() {
+        unregisterReceiver(volumeReceiver)
+    }
+
+    private val volumeReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == "android.media.VOLUME_CHANGED_ACTION") {
+                resetVolume()
+            }
+        }
+    }
+
+    private fun resetVolume() {
+        val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVolume, 0)
     }
 }
