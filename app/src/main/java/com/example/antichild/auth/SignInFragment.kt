@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
+import androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE
 import com.example.antichild.MotionDetectionFragment
 import com.example.antichild.R
 import com.example.antichild.databinding.FragmentSignInBinding
@@ -55,6 +56,9 @@ class SignInFragment : Fragment() {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     Log.d("SignInFragment", "signInWithEmail:success: ${task.result.user?.uid}")
+
+                    parentFragmentManager
+                        .popBackStack(null, POP_BACK_STACK_INCLUSIVE)
 
                     parentFragmentManager
                         .beginTransaction()

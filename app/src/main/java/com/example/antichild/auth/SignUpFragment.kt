@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import com.example.antichild.MotionDetectionFragment
 import com.example.antichild.R
 import com.example.antichild.databinding.FragmentSignUpBinding
@@ -127,6 +128,9 @@ class SignUpFragment : Fragment() {
                     Log.d("SignUpFragment", "createUserWithEmail:success: ${task.result.user?.uid}")
 
                     addUserToDb(username, email, role, advance)
+
+                    parentFragmentManager
+                        .popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
 
                     parentFragmentManager
                         .beginTransaction()
