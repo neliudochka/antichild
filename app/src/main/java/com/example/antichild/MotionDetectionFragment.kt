@@ -15,6 +15,7 @@ import com.google.firebase.auth.auth
 import java.util.Locale
 import kotlin.math.sqrt
 import kotlin.properties.Delegates
+import android.content.Intent
 
 class MotionDetectionFragment : Fragment() {
     private lateinit var binding: FragmentMotionDetectionBinding
@@ -69,6 +70,7 @@ class MotionDetectionFragment : Fragment() {
         binding.reset.setOnClickListener{
             isStolen = false
             binding.movementDetectionTextview.text = resources.getText(R.string.no_movement_detected)
+            stopMusicService()
         }
 
         binding.logout.setOnClickListener {
@@ -142,11 +144,21 @@ class MotionDetectionFragment : Fragment() {
         if (mAccel > 0.5) {
             isStolen = true
             binding.movementDetectionTextview.text = resources.getText(R.string.movement_detected)
+            startMusicService()
             switchOffSensors()
             switchActivatedButton()
         }
     }
 
+    //music Service
+    private fun startMusicService() {
+        val intent = Intent(context, MusicService::class.java)
+        activity?.startService(intent)
+    }
+
+    private fun stopMusicService() {
+        activity?.stopService(Intent(context, MusicService::class.java))
+    }
     companion object {
         @JvmStatic
         fun newInstance() = MotionDetectionFragment()
