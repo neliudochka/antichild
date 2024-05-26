@@ -62,6 +62,14 @@ class SignUpFragment : Fragment() {
             }
         }
 
+        binding.accessPassword.addTextChangedListener {
+            checkFields()
+        }
+
+        binding.parentEmail.addTextChangedListener {
+            checkFields()
+        }
+
         binding.signUpButton.setOnClickListener {
             registerNewUser()
         }
@@ -74,8 +82,17 @@ class SignUpFragment : Fragment() {
         val email = binding.email.text.toString()
         val password = binding.password.text.toString()
         val repeatPassword = binding.repeatPassword.text.toString()
+        val accessPassword = binding.accessPassword.text.toString()
+        val parentEmail = binding.parentEmail.text.toString()
 
-        binding.signUpButton.isEnabled = username.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty() && repeatPassword.isNotEmpty()
+        val isRoleParent = binding.roleParent.isChecked
+        val isRoleChild = binding.roleChild.isChecked
+
+        binding.signUpButton.isEnabled = username.isNotEmpty() &&
+                email.isNotEmpty() &&
+                password.isNotEmpty() &&
+                repeatPassword.isNotEmpty() &&
+                ((isRoleParent && accessPassword.isNotEmpty()) || (isRoleChild && parentEmail.isNotEmpty()))
     }
 
     private fun registerNewUser() {
