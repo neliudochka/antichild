@@ -14,7 +14,10 @@ import com.example.antichild.databinding.FragmentSignUpBinding
 import com.example.antichild.models.Child
 import com.example.antichild.models.Parent
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 class SignUpFragment : Fragment() {
     private lateinit var binding: FragmentSignUpBinding
@@ -71,7 +74,15 @@ class SignUpFragment : Fragment() {
         }
 
         binding.signUpButton.setOnClickListener {
-            registerNewUser()
+            if (binding.roleChild.isChecked) {
+                checkIfParentExists(binding.parentEmail.text.toString()) { exists ->
+                    if (!exists) {
+                        Toast.makeText(context, "Parent with this email doesn't exist", Toast.LENGTH_SHORT).show()
+                    } else {
+                        registerNewUser()
+                    }
+                }
+            } else registerNewUser()
         }
 
         return binding.root
@@ -149,6 +160,24 @@ class SignUpFragment : Fragment() {
             .addOnFailureListener { e ->
                 Log.e("SignUpFragment", "Error adding user to database", e)
             }
+    }
+
+    private fun checkIfParentExists(email: String, callback: (Boolean) -> Unit) {
+        val database = FirebaseDatabase.getInstance()
+        val parentRef = database.getReference("/users/parent")
+
+        parentRef.orderByChild("email").equalTo(email)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val exists = snapshot.exists()
+                    callback(exists)
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("SignUpFragment", "Database error: ${error.message}")
+                    callback(false)
+                }
+            })
     }
 
     companion object {
