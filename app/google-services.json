@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "1017848097504",
+    "project_id": "antichild-99875",
+    "firebase_url": "https://antichild-99875-default-rtdb.europe-west1.firebasedatabase.app/",
+    "storage_bucket": "antichild-99875.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1017848097504:android:83bd5e254a9cb22da9be85",
+        "android_client_info": {
+          "package_name": "com.example.antichild"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCz0wHi01h4ZTpAwzOF7Q74Fhf86iVySLU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

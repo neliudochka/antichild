@@ -7,8 +7,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import com.example.antichild.auth.LaunchFragment
 import com.example.antichild.databinding.FragmentMotionDetectionBinding
 import com.example.antichild.sensors.AccelerometerSensor
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import java.util.Locale
 import kotlin.math.sqrt
 import kotlin.properties.Delegates
@@ -30,7 +33,9 @@ class MotionDetectionFragment : Fragment() {
     }
 
     override fun onDestroy() {
-        killSensors()
+        if (::accelerometerSensor.isInitialized) {
+            killSensors()
+        }
         super.onDestroy()
     }
 
@@ -66,6 +71,14 @@ class MotionDetectionFragment : Fragment() {
             isStolen = false
             binding.movementDetectionTextview.text = resources.getText(R.string.no_movement_detected)
             stopMusicService()
+        }
+
+        binding.logout.setOnClickListener {
+            Firebase.auth.signOut()
+            parentFragmentManager
+                .beginTransaction()
+                .replace(R.id.fragment_container, LaunchFragment.newInstance())
+                .commit()
         }
     }
 
