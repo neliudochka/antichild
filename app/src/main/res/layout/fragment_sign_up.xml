@@ -81,6 +81,65 @@
             android:padding="5dp"
             android:layout_margin="10dp" />
 
+        <RadioGroup
+            android:id="@+id/role_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp">
+
+            <RadioButton
+                android:id="@+id/role_parent"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="parent"
+                android:gravity="center"/>
+
+            <RadioButton
+                android:id="@+id/role_child"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="child"
+                android:gravity="center"/>
+        </RadioGroup>
+
+        <TextView
+            android:id="@+id/access_password_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="10dp"
+            android:text="access password"
+            android:visibility="gone"/>
+
+        <EditText
+            android:id="@+id/access_password"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:inputType="textPassword"
+            android:padding="5dp"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/parent_email_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="10dp"
+            android:text="parent email"
+            android:visibility="gone"/>
+
+        <EditText
+            android:id="@+id/parent_email"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:inputType="textEmailAddress"
+            android:padding="5dp"
+            android:visibility="gone"/>
+
         <Button
             android:id="@+id/sign_up_button"
             android:layout_width="match_parent"
