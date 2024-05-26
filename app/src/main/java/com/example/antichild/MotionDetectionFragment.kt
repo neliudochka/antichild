@@ -32,7 +32,9 @@ class MotionDetectionFragment : Fragment() {
     }
 
     override fun onDestroy() {
-        killSensors()
+        if (::accelerometerSensor.isInitialized) {
+            killSensors()
+        }
         super.onDestroy()
     }
 
