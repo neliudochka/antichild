@@ -11,7 +11,8 @@ import androidx.fragment.app.Fragment
 import com.example.antichild.MotionDetectionFragment
 import com.example.antichild.R
 import com.example.antichild.databinding.FragmentSignUpBinding
-import com.example.antichild.models.User
+import com.example.antichild.models.Child
+import com.example.antichild.models.Parent
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 
@@ -43,6 +44,24 @@ class SignUpFragment : Fragment() {
             checkFields()
         }
 
+        binding.roleGroup.setOnCheckedChangeListener { _, checkedId ->
+            when (checkedId) {
+                R.id.role_parent -> {
+                    binding.accessPassword.visibility = View.VISIBLE
+                    binding.parentEmail.visibility = View.GONE
+                    binding.accessPasswordText.visibility = View.VISIBLE
+                    binding.parentEmailText.visibility = View.GONE
+                }
+
+                R.id.role_child -> {
+                    binding.accessPassword.visibility = View.GONE
+                    binding.parentEmail.visibility = View.VISIBLE
+                    binding.accessPasswordText.visibility = View.GONE
+                    binding.parentEmailText.visibility = View.VISIBLE
+                }
+            }
+        }
+
         binding.signUpButton.setOnClickListener {
             registerNewUser()
         }
@@ -64,9 +83,13 @@ class SignUpFragment : Fragment() {
         val email = binding.email.text.toString()
         val password = binding.password.text.toString()
         val repeatPassword = binding.repeatPassword.text.toString()
+        val role = if (binding.roleParent.isChecked) "parent" else "child"
+        val advance = if (role == "parent")
+            binding.accessPassword.text.toString()
+        else binding.parentEmail.text.toString()
 
         if (repeatPassword != password) {
-            Toast.makeText(requireContext(), "Password and repeat password are not the same!", Toast.LENGTH_LONG).show()
+            Toast.makeText(requireContext(), "Passwords do not match!", Toast.LENGTH_LONG).show()
             return
         }
 
@@ -75,7 +98,7 @@ class SignUpFragment : Fragment() {
                 if (task.isSuccessful) {
                     Log.d("SignUpFragment", "createUserWithEmail:success: ${task.result.user?.uid}")
 
-                    addUserToDb(username, email)
+                    addUserToDb(username, email, role, advance)
 
                     parentFragmentManager
                         .beginTransaction()
@@ -88,11 +111,19 @@ class SignUpFragment : Fragment() {
             }
     }
 
-    private fun addUserToDb(username: String, email: String) {
+    private fun addUserToDb(username: String, email: String, role: String, advance: String) {
         val uid = FirebaseAuth.getInstance().uid ?: ""
-        val ref = FirebaseDatabase.getInstance().getReference("/users/$uid")
+        val ref = if (role == "parent") {
+            FirebaseDatabase.getInstance().getReference("/users/parent/$uid")
+        } else {
+            FirebaseDatabase.getInstance().getReference("/users/child/$uid")
+        }
 
-        val user = User(uid, username, email)
+        val user = if (role == "parent") {
+            Parent(uid, username, email, role, advance)
+        } else {
+            Child(uid, username, email, role, advance)
+        }
 
         ref.setValue(user)
             .addOnSuccessListener {
