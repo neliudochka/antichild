@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import com.example.antichild.auth.LaunchFragment
 import com.example.antichild.auth.SignInFragment
 import com.example.antichild.databinding.FragmentToolsBinding
+import com.example.antichild.utils.SharedPreferencesHelper
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
@@ -20,16 +21,22 @@ class ToolsFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentToolsBinding.inflate(inflater, container, false)
 
         auth = FirebaseAuth.getInstance()
 
+        addGreetingText()
         setButtonListeners()
 
         return binding.root
     }
 
+    @SuppressLint("SetTextI18n")
+    private fun addGreetingText(){
+        val userdata = SharedPreferencesHelper.getUserData()
+        binding.helloText.text = "hello " + userdata.username + "! role: " + userdata.role
+    }
     private fun setButtonListeners() {
         binding.motionAlarmButton.setOnClickListener {
             parentFragmentManager
@@ -41,6 +48,7 @@ class ToolsFragment : Fragment() {
 
         binding.logout.setOnClickListener {
             Firebase.auth.signOut()
+            SharedPreferencesHelper.clearUserData()
             parentFragmentManager
                 .beginTransaction()
                 .replace(R.id.fragment_container, LaunchFragment.newInstance())

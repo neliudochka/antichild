@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.example.antichild.auth.LaunchFragment
 import com.example.antichild.databinding.ActivityMainBinding
+import com.example.antichild.utils.SharedPreferencesHelper
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
@@ -26,6 +27,8 @@ class MainActivity : AppCompatActivity() {
     public override fun onStart() {
         super.onStart()
         val currentUser = auth.currentUser
+
+        SharedPreferencesHelper.init(this)
 
         if (currentUser != null) {
             supportFragmentManager

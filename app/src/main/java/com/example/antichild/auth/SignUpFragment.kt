@@ -15,6 +15,7 @@ import com.example.antichild.ToolsFragment
 import com.example.antichild.databinding.FragmentSignUpBinding
 import com.example.antichild.models.Child
 import com.example.antichild.models.Parent
+import com.example.antichild.utils.SharedPreferencesHelper
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -129,6 +130,13 @@ class SignUpFragment : Fragment() {
                     Log.d("SignUpFragment", "createUserWithEmail:success: ${task.result.user?.uid}")
 
                     addUserToDb(username, email, role, advance)
+
+                    SharedPreferencesHelper.saveUserData(
+                        auth.uid.toString(),
+                        username,
+                        email,
+                        role,
+                        advance)
 
                     parentFragmentManager
                         .popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
