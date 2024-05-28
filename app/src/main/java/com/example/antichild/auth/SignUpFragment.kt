@@ -9,7 +9,6 @@ import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import com.example.antichild.MotionDetectionFragment
 import com.example.antichild.R
 import com.example.antichild.ToolsFragment
 import com.example.antichild.databinding.FragmentSignUpBinding
@@ -173,8 +172,6 @@ class SignUpFragment : Fragment() {
             .addOnFailureListener { e ->
                 Log.e("SignUpFragment", "Error adding user to database", e)
             }
-
-        //save user in sh pref
     }
 
     private fun checkIfParentExists(email: String, callback: (Boolean) -> Unit) {

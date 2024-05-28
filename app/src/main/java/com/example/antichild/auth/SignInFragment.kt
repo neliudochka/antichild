@@ -9,13 +9,11 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE
-import com.example.antichild.MotionDetectionFragment
 import com.example.antichild.R
 import com.example.antichild.ToolsFragment
 import com.example.antichild.databinding.FragmentSignInBinding
 import com.example.antichild.models.Child
 import com.example.antichild.models.Parent
-import com.example.antichild.models.User
 import com.example.antichild.utils.SharedPreferencesHelper
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -23,8 +21,6 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.getValue
-import com.google.firebase.firestore.FirebaseFirestore
-
 class SignInFragment : Fragment() {
     private lateinit var binding: FragmentSignInBinding
     private lateinit var auth: FirebaseAuth

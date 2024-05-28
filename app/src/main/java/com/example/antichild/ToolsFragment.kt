@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.example.antichild.auth.LaunchFragment
-import com.example.antichild.auth.SignInFragment
 import com.example.antichild.databinding.FragmentToolsBinding
 import com.example.antichild.utils.SharedPreferencesHelper
 import com.google.firebase.Firebase
