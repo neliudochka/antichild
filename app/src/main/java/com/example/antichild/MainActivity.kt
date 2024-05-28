@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity() {
         if (currentUser != null) {
             supportFragmentManager
                 .beginTransaction()
-                .replace(R.id.fragment_container, MotionDetectionFragment.newInstance())
+                .replace(R.id.fragment_container, ToolsFragment.newInstance())
                 .commit()
         } else {
             supportFragmentManager

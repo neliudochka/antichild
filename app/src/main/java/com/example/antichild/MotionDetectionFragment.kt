@@ -72,14 +72,6 @@ class MotionDetectionFragment : Fragment() {
             binding.movementDetectionTextview.text = resources.getText(R.string.no_movement_detected)
             stopMusicService()
         }
-
-        binding.logout.setOnClickListener {
-            Firebase.auth.signOut()
-            parentFragmentManager
-                .beginTransaction()
-                .replace(R.id.fragment_container, LaunchFragment.newInstance())
-                .commit()
-        }
     }
 
     private fun switchActivatedButton() {

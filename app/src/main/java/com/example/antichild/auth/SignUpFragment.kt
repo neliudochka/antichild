@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.example.antichild.MotionDetectionFragment
 import com.example.antichild.R
+import com.example.antichild.ToolsFragment
 import com.example.antichild.databinding.FragmentSignUpBinding
 import com.example.antichild.models.Child
 import com.example.antichild.models.Parent
@@ -134,7 +135,7 @@ class SignUpFragment : Fragment() {
 
                     parentFragmentManager
                         .beginTransaction()
-                        .replace(R.id.fragment_container, MotionDetectionFragment.newInstance())
+                        .replace(R.id.fragment_container, ToolsFragment.newInstance())
                         .commit()
                 } else {
                     Log.w("SignUpFragment", "createUserWithEmail:failure", task.exception)
@@ -164,6 +165,8 @@ class SignUpFragment : Fragment() {
             .addOnFailureListener { e ->
                 Log.e("SignUpFragment", "Error adding user to database", e)
             }
+
+        //save user in sh pref
     }
 
     private fun checkIfParentExists(email: String, callback: (Boolean) -> Unit) {

@@ -11,6 +11,7 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE
 import com.example.antichild.MotionDetectionFragment
 import com.example.antichild.R
+import com.example.antichild.ToolsFragment
 import com.example.antichild.databinding.FragmentSignInBinding
 import com.google.firebase.auth.FirebaseAuth
 
@@ -62,7 +63,7 @@ class SignInFragment : Fragment() {
 
                     parentFragmentManager
                         .beginTransaction()
-                        .replace(R.id.fragment_container, MotionDetectionFragment.newInstance())
+                        .replace(R.id.fragment_container, ToolsFragment.newInstance())
                         .commit()
                 } else {
                     Log.w("SignInFragment", "signInWithEmail:failure", task.exception)
