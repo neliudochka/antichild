@@ -5,5 +5,5 @@ data class UserData(
     val username: String?,
     val email: String?,
     val role: String?,
-    val advance: String?
+    val parentAccessPassword: String?
 )

@@ -130,20 +130,35 @@ class SignUpFragment : Fragment() {
 
                     addUserToDb(username, email, role, advance)
 
-                    SharedPreferencesHelper.saveUserData(
-                        auth.uid.toString(),
-                        username,
-                        email,
-                        role,
-                        advance)
+                    val uid = auth.uid.toString()
+                    if (role == "parent") {
+                        SharedPreferencesHelper.saveUserData(
+                            uid,
+                            username,
+                            email,
+                            role,
+                            advance)
+                        navigateToToolsFragment()
+                    } else {
+                        getParentsAccessPasswordByEmail(advance, object :
+                            SignUpFragment.ParentPasswordCallback {
+                            override fun onPasswordRetrieved(parentAccessPassword: String) {
+                                SharedPreferencesHelper.saveUserData(
+                                    uid,
+                                    username,
+                                    email,
+                                    role,
+                                    parentAccessPassword
+                                )
+                                navigateToToolsFragment()
+                            }
 
-                    parentFragmentManager
-                        .popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+                            override fun onError(error: String) {
+                                Log.e("SignUpFragment", error)
+                            }
+                        })
+                    }
 
-                    parentFragmentManager
-                        .beginTransaction()
-                        .replace(R.id.fragment_container, ToolsFragment.newInstance())
-                        .commit()
                 } else {
                     Log.w("SignUpFragment", "createUserWithEmail:failure", task.exception)
                     Toast.makeText(requireContext(), "Oops, something went wrong!", Toast.LENGTH_SHORT).show()
@@ -192,6 +207,47 @@ class SignUpFragment : Fragment() {
             })
     }
 
+    interface ParentPasswordCallback {
+        fun onPasswordRetrieved(parentAccessPassword: String)
+        fun onError(error: String)
+    }
+
+    private fun getParentsAccessPasswordByEmail(parentEmail: String, callback: ParentPasswordCallback) {
+        val parentRef = FirebaseDatabase.getInstance().getReference("/users/parent")
+
+        parentRef.orderByChild("email").equalTo(parentEmail)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        for (childSnapshot in snapshot.children) {
+                            val parentUser = childSnapshot.getValue(Parent::class.java)
+                            if (parentUser != null) {
+                                callback.onPasswordRetrieved(parentUser.accessPassword)
+                                return
+                            } else {
+                                callback.onError("Parent user data is null")
+                            }
+                        }
+                    } else {
+                        callback.onError("Snapshot does not exist")
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    callback.onError(error.message)
+                }
+            })
+    }
+
+    fun navigateToToolsFragment() {
+        parentFragmentManager
+            .popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+
+        parentFragmentManager
+            .beginTransaction()
+            .replace(R.id.fragment_container, ToolsFragment.newInstance())
+            .commit()
+    }
     companion object {
         @JvmStatic
         fun newInstance() = SignUpFragment()

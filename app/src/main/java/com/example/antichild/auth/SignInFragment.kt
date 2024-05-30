@@ -75,27 +75,33 @@ class SignInFragment : Fragment() {
             }
     }
 
-    private fun checkChildUser (uid: String, email: String) {
+    private fun checkChildUser(uid: String, email: String) {
         val childRef = FirebaseDatabase.getInstance().getReference("/users/child/$uid")
 
         childRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
-                    val childRef = snapshot.getValue<Child>()
-                    if (childRef != null) {
-                        val username = childRef.username
-                        val role = childRef.role
-                        val advance = childRef.parentEmail
+                    val childUser = snapshot.getValue(Child::class.java)
+                    if (childUser != null) {
+                        val username = childUser.username
+                        val role = childUser.role
 
-                        SharedPreferencesHelper.saveUserData(
-                            uid,
-                            username,
-                            email,
-                            role,
-                            advance
-                        )
+                        getParentsAccessPasswordByEmail(childUser.parentEmail, object : ParentPasswordCallback {
+                            override fun onPasswordRetrieved(parentAccessPassword: String) {
+                                SharedPreferencesHelper.saveUserData(
+                                    uid,
+                                    username,
+                                    email,
+                                    role,
+                                    parentAccessPassword
+                                )
+                                navigateToToolsFragment()
+                            }
 
-                        navigateToToolsFragment()
+                            override fun onError(error: String) {
+                                Log.e("SignInFragment", error)
+                            }
+                        })
                     } else {
                         Log.e("SignInFragment", "Child user data is null")
                     }
@@ -120,14 +126,14 @@ class SignInFragment : Fragment() {
                     if (parentUser != null) {
                         val username = parentUser.username
                         val role = parentUser.role
-                        val advance = ""
+                        val parentAccessPassword = parentUser.accessPassword
 
                         SharedPreferencesHelper.saveUserData(
                             uid,
                             username,
                             email,
                             role,
-                            advance
+                            parentAccessPassword
                         )
 
                         navigateToToolsFragment()
@@ -154,6 +160,39 @@ class SignInFragment : Fragment() {
             .replace(R.id.fragment_container, ToolsFragment.newInstance())
             .commit()
     }
+
+    interface ParentPasswordCallback {
+        fun onPasswordRetrieved(parentAccessPassword: String)
+        fun onError(error: String)
+    }
+
+    fun getParentsAccessPasswordByEmail(parentEmail: String, callback: ParentPasswordCallback) {
+        val parentRef = FirebaseDatabase.getInstance().getReference("/users/parent")
+
+        parentRef.orderByChild("email").equalTo(parentEmail)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        for (childSnapshot in snapshot.children) {
+                            val parentUser = childSnapshot.getValue(Parent::class.java)
+                            if (parentUser != null) {
+                                callback.onPasswordRetrieved(parentUser.accessPassword)
+                                return
+                            } else {
+                                callback.onError("Parent user data is null")
+                            }
+                        }
+                    } else {
+                        callback.onError("Snapshot does not exist")
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    callback.onError(error.message)
+                }
+            })
+    }
+
     companion object {
         @JvmStatic
         fun newInstance() = SignInFragment()
