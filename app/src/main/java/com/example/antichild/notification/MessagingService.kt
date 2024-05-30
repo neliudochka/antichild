@@ -1,10 +1,17 @@
 package com.example.antichild.notification
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Intent
 import android.util.Log
+import androidx.core.app.NotificationCompat
+import com.example.antichild.MainActivity
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+
 
 class MessagingService: FirebaseMessagingService() {
 
@@ -12,6 +19,7 @@ class MessagingService: FirebaseMessagingService() {
         if (message.data.isNotEmpty()) {
             Log.d("MessagingService", "Message Data payload: " + message.data)
         }
+
         if (message.notification != null) {
             sendNotification(
                 message.notification!!.body!!, message.notification!!.title!!
@@ -28,8 +36,40 @@ class MessagingService: FirebaseMessagingService() {
         // sendRegistrationToServer(token)
     }
 
-    fun sendNotification(text: String, title: String) {
+    private fun sendNotification(text: String, title: String) {
+        val intent = Intent(this, MainActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, intent, PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
+        )
 
+        val buttonIntent = Intent(this, ButtonActionReceiver::class.java).apply {
+            action = "com.example.antichild.ACTION_BUTTON"
+        }
+        val buttonPendingIntent = PendingIntent.getBroadcast(
+            this, 0, buttonIntent, PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val channelId = "Default"
+        val notificationBuilder = NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(android.R.drawable.ic_dialog_email)
+            .setContentTitle(title)
+            .setContentText(text)
+            .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+            .addAction(android.R.drawable.ic_input_add, "Turn off", buttonPendingIntent)
+
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+
+        val channel = NotificationChannel(
+            channelId,
+            "Default channel",
+            NotificationManager.IMPORTANCE_DEFAULT
+        )
+        notificationManager.createNotificationChannel(channel)
+
+        notificationManager.notify(0, notificationBuilder.build())
     }
 
     fun sendRegistrationToServer(token: String) {
