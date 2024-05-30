@@ -2,8 +2,8 @@
     <string name="app_name">AntiChild</string>
     <string name="accelerometer">Accelerometer</string>
     <string name="accelerometer_result">"x: 0.0   y: 0.0   z: 0.0"</string>
-    <string name="activate_the_motion_alarm">Activate the motion alarm</string>
-    <string name="reset">reset</string>
+    <string name="activate_the_motion_alarm">Activate</string>
+    <string name="reset">Stop</string>
     <string name="no_motion_detected">no motion detected</string>
     <string name="no_movement_detected">No movement detected</string>
     <string name="activate_sensors">Activate sensors</string>
@@ -13,4 +13,5 @@
     <string name="tools">Tools:</string>
     <string name="motion_alarm">Motion Alarm</string>
     <string name="logout">logout</string>
+    <string name="access_parent_password">Access parent password</string>
 </resources>

@@ -16,6 +16,7 @@ import java.util.Locale
 import kotlin.math.sqrt
 import kotlin.properties.Delegates
 import android.content.Intent
+import com.example.antichild.utils.SharedPreferencesHelper
 
 class MotionDetectionFragment : Fragment() {
     private lateinit var binding: FragmentMotionDetectionBinding
@@ -51,46 +52,44 @@ class MotionDetectionFragment : Fragment() {
         pinky = requireContext().getColor(R.color.pinky)
         red = requireContext().getColor(R.color.red)
 
-        binding.motionAlarmActivationButton.setBackgroundColor(greyColor)
+        binding.motionAlarmActivationButton.setBackgroundColor(red)
         binding.motionAlarmActivationButton.setOnClickListener {
-            if (!isStolen)
-                if(isSensors)
-                    switchActivatedButton()
-                else
-                    Toast.makeText(requireContext(), "Firstly, turn on the sensors", Toast.LENGTH_SHORT).show()
+            switchActivateStopButtons()
         }
 
-        binding.onOffSensors.setBackgroundColor(greyColor)
-        binding.onOffSensors.setOnClickListener {
-            if (!isStolen)
-                switchOffSensors()
-        }
-
-        binding.reset.setBackgroundColor(red)
-        binding.reset.setOnClickListener{
-            isStolen = false
-            binding.movementDetectionTextview.text = resources.getText(R.string.no_movement_detected)
-            stopMusicService()
+        binding.stop.setBackgroundColor(red)
+        binding.stop.setOnClickListener{
+            if (binding.passwordEditText.text.toString() == SharedPreferencesHelper.getUserData().parentAccessPassword) {
+                isStolen = false
+                binding.movementDetectionTextview.text = resources.getText(R.string.no_movement_detected)
+                stopMusicService()
+                switchActivateStopButtons()
+            } else {
+                Toast.makeText(context, "Wrong password", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
-    private fun switchActivatedButton() {
+    private fun switchActivateStopButtons() {
         if(isActivated) {
             isActivated = false
-            binding.motionAlarmActivationButton.setBackgroundColor(greyColor)
+            binding.motionAlarmActivationButton.visibility = View.VISIBLE
+            binding.stop.visibility = View.INVISIBLE
+            binding.passwordEditText.visibility = View.INVISIBLE
         } else {
             isActivated = true
-            binding.motionAlarmActivationButton.setBackgroundColor(pinky)
+            switchOnOffSensors()
+            binding.motionAlarmActivationButton.visibility = View.INVISIBLE
+            binding.stop.visibility = View.VISIBLE
+            binding.passwordEditText.visibility = View.VISIBLE
         }
     }
-    private fun switchOffSensors() {
+    private fun switchOnOffSensors() {
         if(isSensors) {
             isSensors = false
-            binding.onOffSensors.setBackgroundColor(greyColor)
             killSensors()
         } else {
             isSensors = true
-            binding.onOffSensors.setBackgroundColor(pinky)
             initSensors()
         }
     }
@@ -104,8 +103,6 @@ class MotionDetectionFragment : Fragment() {
     private fun startAccelerometer() {
         accelerometerSensor.startListening()
         accelerometerSensor.setOnSensorValuesChangedListener { a ->
-            val result: String? = java.lang.String.format(Locale.US, "x: %.4f   y: %.4f   z: %.4f", a[0], a[1], a[2])
-            binding.accRes.text = result
             if(isActivated && !isStolen) {
                 checkMotion(a.toList())
             }
@@ -137,8 +134,7 @@ class MotionDetectionFragment : Fragment() {
             isStolen = true
             binding.movementDetectionTextview.text = resources.getText(R.string.movement_detected)
             startMusicService()
-            switchOffSensors()
-            switchActivatedButton()
+            switchOnOffSensors()
         }
     }
 
