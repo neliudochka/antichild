@@ -14,4 +14,5 @@
     <string name="motion_alarm">Motion Alarm</string>
     <string name="logout">logout</string>
     <string name="access_parent_password">Access parent password</string>
+    <string name="motion_alarm_status">Motion alarm status: </string>
 </resources>

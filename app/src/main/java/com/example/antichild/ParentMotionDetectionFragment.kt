@@ -1,59 +1,69 @@
 package com.example.antichild
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.fragment.app.Fragment
+import com.example.antichild.databinding.FragmentParentMotionDetectionBinding
+import com.example.antichild.utils.SharedPreferencesHelper
+import kotlin.properties.Delegates
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [ParentMotionDetectionFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class ParentMotionDetectionFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
-
+    private lateinit var binding: FragmentParentMotionDetectionBinding
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_parent_motion_detection, container, false)
+    ): View {
+        binding = FragmentParentMotionDetectionBinding.inflate(inflater, container, false)
+
+        setButtonListeners()
+
+        return binding.root
+    }
+
+    //ui
+    private var isActivated = false
+    private var red by Delegates.notNull<Int>()
+
+    private fun setButtonListeners() {
+        red = requireContext().getColor(R.color.red)
+
+        binding.motionAlarmActivationButton.setBackgroundColor(red)
+        binding.motionAlarmActivationButton.setOnClickListener {
+            switchActivateStopButtons()
+        }
+
+        binding.stop.setBackgroundColor(red)
+        binding.stop.setOnClickListener{
+            if (binding.passwordEditText.text.toString() == SharedPreferencesHelper.getUserData().parentAccessPassword) {
+                binding.movementDetectionTextview.text = resources.getText(R.string.no_movement_detected)
+                switchActivateStopButtons()
+            } else {
+                Toast.makeText(context, "Wrong password", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun switchActivateStopButtons() {
+        if(isActivated) {
+            //вимкнути аларм на телефоні чайлда
+            isActivated = false
+            binding.motionAlarmActivationButton.visibility = View.VISIBLE
+            binding.stop.visibility = View.INVISIBLE
+            binding.passwordEditText.visibility = View.INVISIBLE
+        } else {
+            //ввімкнути аларм на телефоні чайлда
+            isActivated = true
+            binding.motionAlarmActivationButton.visibility = View.INVISIBLE
+            binding.stop.visibility = View.VISIBLE
+            binding.passwordEditText.visibility = View.VISIBLE
+        }
     }
 
     companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment ParentMotionDetectionFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            ParentMotionDetectionFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
-    }
+            @JvmStatic
+            fun newInstance() = ParentMotionDetectionFragment()
+        }
 }

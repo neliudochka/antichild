@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.example.antichild.auth.LaunchFragment
 import com.example.antichild.databinding.FragmentToolsBinding
+import com.example.antichild.models.Parent
 import com.example.antichild.utils.SharedPreferencesHelper
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
@@ -37,12 +38,23 @@ class ToolsFragment : Fragment() {
         binding.helloText.text = "hello " + userdata.username + "! role: " + userdata.role
     }
     private fun setButtonListeners() {
-        binding.motionAlarmButton.setOnClickListener {
-            parentFragmentManager
-                .beginTransaction()
-                .replace(R.id.fragment_container, MotionDetectionFragment.newInstance())
-                .addToBackStack(null)
-                .commit()
+        val userdata = SharedPreferencesHelper.getUserData()
+        if (userdata.role == "child") {
+            binding.motionAlarmButton.setOnClickListener {
+                parentFragmentManager
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, MotionDetectionFragment.newInstance())
+                    .addToBackStack(null)
+                    .commit()
+            }
+        } else {
+            binding.motionAlarmButton.setOnClickListener {
+                parentFragmentManager
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, ParentMotionDetectionFragment.newInstance())
+                    .addToBackStack(null)
+                    .commit()
+            }
         }
 
         binding.logout.setOnClickListener {
