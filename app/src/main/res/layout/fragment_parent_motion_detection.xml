@@ -5,19 +5,26 @@
     android:id="@+id/frameLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MotionDetectionFragment">
+    tools:context=".ParentMotionDetectionFragment">
 
+    <TextView
+        android:id="@+id/alarm_status_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/motion_alarm_status"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.3"/>
 
     <TextView
         android:id="@+id/movement_detection_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/no_movement_detected"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.3"/>
+        app:layout_constraintStart_toEndOf="@+id/alarm_status_textview"
+        app:layout_constraintTop_toTopOf="@+id/alarm_status_textview"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <Button
         android:id="@+id/motion_alarm_activation_button"

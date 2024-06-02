@@ -9,11 +9,12 @@ import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import com.example.antichild.MotionDetectionFragment
 import com.example.antichild.R
+import com.example.antichild.ToolsFragment
 import com.example.antichild.databinding.FragmentSignUpBinding
 import com.example.antichild.models.Child
 import com.example.antichild.models.Parent
+import com.example.antichild.utils.SharedPreferencesHelper
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -129,13 +130,35 @@ class SignUpFragment : Fragment() {
 
                     addUserToDb(username, email, role, advance)
 
-                    parentFragmentManager
-                        .popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+                    val uid = auth.uid.toString()
+                    if (role == "parent") {
+                        SharedPreferencesHelper.saveUserData(
+                            uid,
+                            username,
+                            email,
+                            role,
+                            advance)
+                        navigateToToolsFragment()
+                    } else {
+                        getParentsAccessPasswordByEmail(advance, object :
+                            SignUpFragment.ParentPasswordCallback {
+                            override fun onPasswordRetrieved(parentAccessPassword: String) {
+                                SharedPreferencesHelper.saveUserData(
+                                    uid,
+                                    username,
+                                    email,
+                                    role,
+                                    parentAccessPassword
+                                )
+                                navigateToToolsFragment()
+                            }
 
-                    parentFragmentManager
-                        .beginTransaction()
-                        .replace(R.id.fragment_container, MotionDetectionFragment.newInstance())
-                        .commit()
+                            override fun onError(error: String) {
+                                Log.e("SignUpFragment", error)
+                            }
+                        })
+                    }
+
                 } else {
                     Log.w("SignUpFragment", "createUserWithEmail:failure", task.exception)
                     Toast.makeText(requireContext(), "Oops, something went wrong!", Toast.LENGTH_SHORT).show()
@@ -184,6 +207,47 @@ class SignUpFragment : Fragment() {
             })
     }
 
+    interface ParentPasswordCallback {
+        fun onPasswordRetrieved(parentAccessPassword: String)
+        fun onError(error: String)
+    }
+
+    private fun getParentsAccessPasswordByEmail(parentEmail: String, callback: ParentPasswordCallback) {
+        val parentRef = FirebaseDatabase.getInstance().getReference("/users/parent")
+
+        parentRef.orderByChild("email").equalTo(parentEmail)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        for (childSnapshot in snapshot.children) {
+                            val parentUser = childSnapshot.getValue(Parent::class.java)
+                            if (parentUser != null) {
+                                callback.onPasswordRetrieved(parentUser.accessPassword)
+                                return
+                            } else {
+                                callback.onError("Parent user data is null")
+                            }
+                        }
+                    } else {
+                        callback.onError("Snapshot does not exist")
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    callback.onError(error.message)
+                }
+            })
+    }
+
+    fun navigateToToolsFragment() {
+        parentFragmentManager
+            .popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+
+        parentFragmentManager
+            .beginTransaction()
+            .replace(R.id.fragment_container, ToolsFragment.newInstance())
+            .commit()
+    }
     companion object {
         @JvmStatic
         fun newInstance() = SignUpFragment()
