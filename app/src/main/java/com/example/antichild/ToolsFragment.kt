@@ -15,7 +15,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 
 class ToolsFragment : Fragment() {
-    lateinit var binding: FragmentToolsBinding
+    private lateinit var binding: FragmentToolsBinding
     private lateinit var auth: FirebaseAuth
 
     override fun onCreateView(

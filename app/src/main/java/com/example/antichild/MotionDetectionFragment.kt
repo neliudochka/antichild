@@ -59,7 +59,7 @@ class MotionDetectionFragment : Fragment() {
 
         binding.stop.setBackgroundColor(red)
         binding.stop.setOnClickListener{
-            if (binding.passwordEditText.text.toString() == SharedPreferencesHelper.getUserData().parentAccessPassword) {
+            if (binding.passwordEditText.text.toString() == SharedPreferencesHelper.getChildData().accessPassword) {
                 isStolen = false
                 binding.movementDetectionTextview.text = resources.getText(R.string.no_movement_detected)
                 stopMusicService()

@@ -37,7 +37,7 @@ class ParentMotionDetectionFragment : Fragment() {
 
         binding.stop.setBackgroundColor(red)
         binding.stop.setOnClickListener{
-            if (binding.passwordEditText.text.toString() == SharedPreferencesHelper.getUserData().parentAccessPassword) {
+            if (binding.passwordEditText.text.toString() == SharedPreferencesHelper.getParentData().accessPassword) {
                 binding.movementDetectionTextview.text = resources.getText(R.string.no_movement_detected)
                 switchActivateStopButtons()
             } else {

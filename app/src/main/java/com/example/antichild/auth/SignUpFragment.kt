@@ -132,23 +132,27 @@ class SignUpFragment : Fragment() {
 
                     val uid = auth.uid.toString()
                     if (role == "parent") {
-                        SharedPreferencesHelper.saveUserData(
+                        SharedPreferencesHelper.saveParentUserData(Parent(
                             uid,
                             username,
                             email,
                             role,
-                            advance)
+                            advance
+                        ))
                         navigateToToolsFragment()
                     } else {
-                        getParentsAccessPasswordByEmail(advance, object :
-                            SignUpFragment.ParentPasswordCallback {
-                            override fun onPasswordRetrieved(parentAccessPassword: String) {
-                                SharedPreferencesHelper.saveUserData(
-                                    uid,
-                                    username,
-                                    email,
-                                    role,
-                                    parentAccessPassword
+                        getParentDataByEmail(advance, object :
+                            ParentPasswordCallback {
+                            override fun onPasswordRetrieved(parent: Parent) {
+                                SharedPreferencesHelper.saveChildUserData(
+                                    Child(
+                                        uid,
+                                        username,
+                                        email,
+                                        role,
+                                        advance
+                                    ),
+                                    parent
                                 )
                                 navigateToToolsFragment()
                             }
@@ -208,11 +212,11 @@ class SignUpFragment : Fragment() {
     }
 
     interface ParentPasswordCallback {
-        fun onPasswordRetrieved(parentAccessPassword: String)
+        fun onPasswordRetrieved(parent: Parent)
         fun onError(error: String)
     }
 
-    private fun getParentsAccessPasswordByEmail(parentEmail: String, callback: ParentPasswordCallback) {
+    private fun getParentDataByEmail(parentEmail: String, callback: ParentPasswordCallback) {
         val parentRef = FirebaseDatabase.getInstance().getReference("/users/parent")
 
         parentRef.orderByChild("email").equalTo(parentEmail)
@@ -222,7 +226,7 @@ class SignUpFragment : Fragment() {
                         for (childSnapshot in snapshot.children) {
                             val parentUser = childSnapshot.getValue(Parent::class.java)
                             if (parentUser != null) {
-                                callback.onPasswordRetrieved(parentUser.accessPassword)
+                                callback.onPasswordRetrieved(parentUser)
                                 return
                             } else {
                                 callback.onError("Parent user data is null")
