@@ -4,6 +4,7 @@ open class UserData(
     val uid: String?,
     val username: String?,
     val email: String?,
+    val role: String?,
 )
 
 class ChildData(
@@ -13,12 +14,15 @@ class ChildData(
     parentUid: String?,
     parentUsername: String?,
     parentEmail: String?,
-    accessPassword: String?,
-): UserData(childUid, childYUsername, childEmail)
+    childRole: String?,
+    val accessPassword: String?,
+): UserData(childUid, childYUsername, childEmail, childRole)
 
 class ParentData(
     parentUid: String?,
     parentUsername: String?,
     parentEmail: String?,
-    accessPassword: String?,
-): UserData(parentUid, parentUsername, parentEmail)
+    parentRole: String?,
+    val accessPassword: String?,
+): UserData(parentUid, parentUsername, parentEmail, parentRole) {
+}
