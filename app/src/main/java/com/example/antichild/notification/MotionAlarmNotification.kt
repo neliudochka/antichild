@@ -24,7 +24,8 @@ import java.util.Locale
 
 class MotionAlarmNotification(private val context: Context) {
 
-    fun createMotionRecordChild(childRecord: ChildRecord) {
+    fun createMotionRecordChild() {
+        val childRecord = createChildRecordModel()
         val parentUid = SharedPreferencesHelper.getChildData().parentUid
         val currentUser = FirebaseAuth.getInstance().currentUser?.uid
 
@@ -40,6 +41,56 @@ class MotionAlarmNotification(private val context: Context) {
             .addOnFailureListener { e ->
                 Log.e("MotionRecordChild", "Error sending notification", e)
             }
+    }
+
+    private fun createChildRecordModel(): ChildRecord {
+        val childUid = FirebaseAuth.getInstance().uid
+        val username = SharedPreferencesHelper.getChildData().username
+        val title = "Attention!"
+        val body = "Motion is detected at ${username}'s device!"
+        val calendar = Calendar.getInstance()
+        val date = calendar.time
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        val formattedDate = dateFormat.format(date)
+
+        return ChildRecord(childUid!!, title, body, formattedDate, childUid!!)
+    }
+
+    fun createNotification(childRecord: ChildRecord) {
+
+        val intent = Intent(context, MainActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            context, 0, intent, PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val buttonIntent = Intent(context, ButtonActionReceiver::class.java).apply {
+            action = "com.example.antichild.ACTION_BUTTON"
+        }
+        val buttonPendingIntent = PendingIntent.getBroadcast(
+            context, 0, buttonIntent, PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val channelId = "Default"
+        val notificationBuilder = NotificationCompat.Builder(context, channelId)
+            .setSmallIcon(android.R.drawable.ic_dialog_email)
+            .setContentTitle(childRecord.title)
+            .setContentText(childRecord.body)
+            .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+            .addAction(android.R.drawable.ic_input_add, "Turn off", buttonPendingIntent)
+
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        val channel = NotificationChannel(
+            channelId,
+            "Default channel",
+            NotificationManager.IMPORTANCE_DEFAULT
+        )
+        notificationManager.createNotificationChannel(channel)
+
+        notificationManager.notify(0, notificationBuilder.build())
     }
 
     fun createParentRecord(parentRecord: ParentRecord, childUid: String) {
