@@ -11,7 +11,7 @@ class ChildData(
     childUid: String?,
     childYUsername: String?,
     childEmail: String?,
-    parentUid: String?,
+    val parentUid: String?,
     parentUsername: String?,
     parentEmail: String?,
     childRole: String?,

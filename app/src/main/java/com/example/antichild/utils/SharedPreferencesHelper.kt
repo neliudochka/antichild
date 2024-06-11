@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.example.antichild.models.Child
 import com.example.antichild.models.Parent
-import com.example.antichild.models.User
 import com.google.firebase.auth.FirebaseAuth
 
 object SharedPreferencesHelper {
@@ -31,6 +30,7 @@ object SharedPreferencesHelper {
             putString(KEY_PARENT_NAME, parent.username)
             putString(KEY_PARENT_EMAIL, parent.email)
             putString(KEY_PARENT_ACCESS_PASSWORD, parent.accessPassword)
+            putString(KEY_PARENT_ROLE, parent.role)
             apply()
         }
     }
@@ -41,6 +41,7 @@ object SharedPreferencesHelper {
             putString(KEY_CHILD_UID, child.uid)
             putString(KEY_CHILD_USERNAME, child.username)
             putString(KEY_CHILD_EMAIL, child.email)
+            putString(KEY_CHILD_ROLE, child.role)
             apply()
         }
     }
