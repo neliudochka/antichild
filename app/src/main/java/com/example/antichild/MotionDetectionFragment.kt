@@ -16,17 +16,21 @@ import java.util.Locale
 import kotlin.math.sqrt
 import kotlin.properties.Delegates
 import android.content.Intent
+import com.example.antichild.notification.MotionAlarmNotification
 import com.example.antichild.utils.SharedPreferencesHelper
 
 class MotionDetectionFragment : Fragment() {
     private lateinit var binding: FragmentMotionDetectionBinding
     private lateinit var accelerometerSensor: AccelerometerSensor
+    private lateinit var motionAlarmNotification: MotionAlarmNotification
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentMotionDetectionBinding.inflate(inflater, container, false)
+
+        motionAlarmNotification = MotionAlarmNotification(requireContext())
 
         setButtonListeners()
 
@@ -135,6 +139,9 @@ class MotionDetectionFragment : Fragment() {
             binding.movementDetectionTextview.text = resources.getText(R.string.movement_detected)
             startMusicService()
             switchOnOffSensors()
+
+            // movement detected
+            motionAlarmNotification.createMotionRecordChild()
         }
     }
 
