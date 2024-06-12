@@ -95,11 +95,12 @@ class MotionAlarmNotification(private val context: Context) {
                     for (messSnapshot in snapshot.children) {
                         Log.d("MotionAlarmNotification", messSnapshot.toString())
                         val childNotification = messSnapshot.getValue(ChildRecord::class.java)
+                        Log.d("MotionChildNotification", childNotification.toString())
                         if (childNotification != null) {
-                            val isRead = messSnapshot.child("isRead").value
+                            val isRead = messSnapshot.child("read").value
 
                             if (isRead == false) {
-                                messSnapshot.ref.child("isRead").setValue(true)
+                                messSnapshot.ref.child("read").setValue(true)
                                 callback.onNotificationReceived(childNotification)
                             } else {
                                 callback.onNotificationReceived(null)

@@ -6,13 +6,13 @@ class ChildRecord (
     val body: String = "",
     val date: String = "",
     val fromUid: String = "",
-    var isRead: Boolean = false,
+    var read: Boolean = false,
 )
 
 class ParentRecord(
     val uid: String = "",
     val date: String = "",
-    var isRead: Boolean = false,
+    var read: Boolean = false,
 )
 
 class Notification(
