@@ -56,6 +56,72 @@ class MotionAlarmNotification(private val context: Context) {
         return ChildRecord(childUid!!, title, body, formattedDate, childUid!!)
     }
 
+    private fun getChildrenIds(callback: NotificationCallback) {
+        val parentUid = FirebaseAuth.getInstance().uid
+        val ref = FirebaseDatabase.getInstance().getReference("activity/alarm/$parentUid")
+
+        ref.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    for (childSnapshot in snapshot.children) {
+                        getNotificationData(object : NotificationCallback {
+                            override fun onNotificationReceived(childRecord: ChildRecord?) {
+                                if (childRecord != null) {
+                                    callback.onNotificationReceived(childRecord)
+                                } else {
+                                    Log.d("MotionAlarmNotification", "No notification data available")
+                                }
+                            }
+                        }, childSnapshot.key.toString())
+                    }
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.w("MotionDetectionAlarm", "Failed to read value.", error.toException())
+                callback.onNotificationReceived(null)
+            }
+        })
+    }
+
+    fun getNotificationData(callback: NotificationCallback, childUid: String) {
+        val parentUid = FirebaseAuth.getInstance().uid
+        val ref = FirebaseDatabase.getInstance().getReference("/activity/alarm/$parentUid/$childUid")
+
+        ref.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    Log.d("MotionAlarmNotification", snapshot.toString())
+
+                    for (messSnapshot in snapshot.children) {
+                        Log.d("MotionAlarmNotification", messSnapshot.toString())
+                        val childNotification = messSnapshot.getValue(ChildRecord::class.java)
+                        if (childNotification != null) {
+                            val isRead = messSnapshot.child("isRead").value
+                            if (isRead == false) {
+                                messSnapshot.ref.child("isRead").setValue(true)
+                                callback.onNotificationReceived(childNotification)
+                            } else {
+                                callback.onNotificationReceived(null)
+                            }
+                        }
+                    }
+                } else {
+                    callback.onNotificationReceived(null)
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.w("MotionDetectionAlarm", "Failed to read value.", error.toException())
+                callback.onNotificationReceived(null)
+            }
+        })
+    }
+
+    interface NotificationCallback {
+        fun onNotificationReceived(childRecord: ChildRecord?)
+    }
+
     fun createNotification(childRecord: ChildRecord) {
 
         val intent = Intent(context, MainActivity::class.java).apply {
@@ -91,6 +157,18 @@ class MotionAlarmNotification(private val context: Context) {
         notificationManager.createNotificationChannel(channel)
 
         notificationManager.notify(0, notificationBuilder.build())
+    }
+
+    fun getNotificationParent() {
+        getChildrenIds(object : NotificationCallback {
+            override fun onNotificationReceived(childRecord: ChildRecord?) {
+                if (childRecord != null) {
+                    createNotification(childRecord)
+                } else {
+                    Log.d("MotionAlarmNotification", "No notification data available")
+                }
+            }
+        })
     }
 
     fun createParentRecord(parentRecord: ParentRecord, childUid: String) {
