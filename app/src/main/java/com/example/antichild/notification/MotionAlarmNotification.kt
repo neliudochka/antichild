@@ -18,7 +18,6 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import java.text.SimpleDateFormat
-import java.time.LocalDateTime
 import java.util.Calendar
 import java.util.Locale
 
@@ -98,6 +97,7 @@ class MotionAlarmNotification(private val context: Context) {
                         val childNotification = messSnapshot.getValue(ChildRecord::class.java)
                         if (childNotification != null) {
                             val isRead = messSnapshot.child("isRead").value
+
                             if (isRead == false) {
                                 messSnapshot.ref.child("isRead").setValue(true)
                                 callback.onNotificationReceived(childNotification)
@@ -123,7 +123,6 @@ class MotionAlarmNotification(private val context: Context) {
     }
 
     fun createNotification(childRecord: ChildRecord) {
-
         val intent = Intent(context, MainActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         }
@@ -156,7 +155,9 @@ class MotionAlarmNotification(private val context: Context) {
         )
         notificationManager.createNotificationChannel(channel)
 
-        notificationManager.notify(0, notificationBuilder.build())
+        val notificationId = childRecord.date.hashCode()
+
+        notificationManager.notify(notificationId, notificationBuilder.build())
     }
 
     fun getNotificationParent() {
