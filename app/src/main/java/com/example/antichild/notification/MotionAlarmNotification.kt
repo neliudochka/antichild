@@ -126,7 +126,9 @@ class MotionAlarmNotification(private val context: Context) {
     fun createNotification(childRecord: ChildRecord) {
         val intent = Intent(context, MainActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            putExtra("fragment", "ParentMotionDetectionFragment")
         }
+
         val pendingIntent = PendingIntent.getActivity(
             context, 0, intent, PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
         )
