@@ -8,6 +8,7 @@ import android.content.Intent
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.app.RemoteInput
 import com.example.antichild.MainActivity
 import com.example.antichild.models.ChildRecord
 import com.example.antichild.models.ParentRecord
@@ -133,12 +134,26 @@ class MotionAlarmNotification(private val context: Context) {
             context, 0, intent, PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val buttonIntent = Intent(context, ButtonActionReceiver::class.java).apply {
-            action = "com.example.antichild.ACTION_BUTTON"
+        val replyLabel: String = context.getString(android.R.string.ok)
+        val remoteInput = RemoteInput.Builder(KEY_TEXT_REPLY).run {
+            setLabel(replyLabel)
+            build()
         }
-        val buttonPendingIntent = PendingIntent.getBroadcast(
-            context, 0, buttonIntent, PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
+
+        val replyIntent = Intent(context, ButtonActionReceiver::class.java).apply {
+            action = "com.example.antichild.ACTION_REPLY"
+            putExtra("notification_id", childRecord.date.hashCode())
+        }
+
+        val replyPendingIntent = PendingIntent.getBroadcast(
+            context, 0, replyIntent, PendingIntent.FLAG_UPDATE_CURRENT
         )
+
+        val action = NotificationCompat.Action.Builder(
+            android.R.drawable.ic_input_add,
+            "Turn off",
+            replyPendingIntent
+        ).addRemoteInput(remoteInput).build()
 
         val channelId = "Default"
         val notificationBuilder = NotificationCompat.Builder(context, channelId)
@@ -147,7 +162,7 @@ class MotionAlarmNotification(private val context: Context) {
             .setContentText(childRecord.body)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
-            .addAction(android.R.drawable.ic_input_add, "Turn off", buttonPendingIntent)
+            .addAction(action)
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -205,5 +220,9 @@ class MotionAlarmNotification(private val context: Context) {
             val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
+    }
+
+    companion object {
+        const val KEY_TEXT_REPLY = "key_text_reply"
     }
 }
