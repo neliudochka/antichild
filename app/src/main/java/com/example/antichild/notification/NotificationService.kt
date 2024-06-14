@@ -10,41 +10,42 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.example.antichild.models.ChildRecord
 import com.example.antichild.utils.SharedPreferencesHelper
 
 class NotificationService : Service() {
+    private val handler = Handler(Looper.getMainLooper())
+    private var runnable: Runnable? = null
 
     override fun onCreate() {
         super.onCreate()
-        startForeground(1, createNotification())
+        startForeground(NOTIFICATION_ID, createNotification())
         checkForNotifications()
     }
 
     private fun createNotification(): Notification {
-        val notificationChannelId = "NOTIFICATION_CHANNEL_ID"
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
-                notificationChannelId,
-                "Notification Service",
+                CHANNEL_ID,
+                "Notification Service Channel",
                 NotificationManager.IMPORTANCE_LOW
             )
-            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val manager = getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(channel)
         }
 
-        val notificationBuilder = NotificationCompat.Builder(this, notificationChannelId)
-        return notificationBuilder.setOngoing(true)
+        return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_dialog_email)
             .setContentTitle("Notification Service")
             .setContentText("Checking for new notifications")
+            .setOngoing(true)
             .build()
     }
 
     private fun checkForNotifications() {
-        val handler = Handler(Looper.getMainLooper())
-        val runnable: Runnable = object : Runnable {
+        runnable = object : Runnable {
             override fun run() {
                 val motionAlarmNotification = MotionAlarmNotification(this@NotificationService)
                 val userdata = SharedPreferencesHelper.getUserData()
@@ -55,10 +56,25 @@ class NotificationService : Service() {
                 handler.postDelayed(this, 10000)
             }
         }
-        handler.post(runnable)
+
+        handler.post(runnable!!)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        runnable?.let {
+            handler.removeCallbacks(it)
+        }
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        stopSelf()
     }
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
+    }
+
+    companion object {
+        private const val NOTIFICATION_ID = 1
+        private const val CHANNEL_ID = "NotificationServiceChannel"
     }
 }
