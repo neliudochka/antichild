@@ -9,6 +9,7 @@ import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.RemoteInput
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.antichild.MainActivity
 import com.example.antichild.models.ChildRecord
 import com.example.antichild.models.ParentRecord
@@ -223,8 +224,55 @@ class MotionAlarmNotification(private val context: Context) {
         return ParentRecord(uid, formattedDate)
     }
 
-    fun getParentStopAlarmMessage() {
+    private fun getParentStopAlarmMessage(callback: ParentNotificationCallback) {
+        val childUid = FirebaseAuth.getInstance().uid
+        val parentUid = SharedPreferencesHelper.getChildData().parentUid
+        val ref = FirebaseDatabase
+            .getInstance()
+            .getReference("/activity/alarm/$childUid/$parentUid")
 
+        ref.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    Log.d("MotionAlarmNotification", snapshot.toString())
+
+                    for (messSnapshot in snapshot.children) {
+                        Log.d("MotionAlarmNotification", messSnapshot.toString())
+                        val parentRecord = messSnapshot.getValue(ParentRecord::class.java)
+                        Log.d("MotionChildNotification", parentRecord.toString())
+                        if (parentRecord != null) {
+                            val isRead = messSnapshot.child("read").value
+
+                            if (isRead == false) {
+                                messSnapshot.ref.child("read").setValue(true)
+                                parentRecord.read = true
+                                callback.onNotificationReceived(parentRecord)
+                            } else {
+                                callback.onNotificationReceived(null)
+                            }
+                        }
+                    }
+                } else {
+                    callback.onNotificationReceived(null)
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.w("MotionDetectionAlarm", "Failed to read value.", error.toException())
+                callback.onNotificationReceived(null)
+            }
+        })
+    }
+
+    fun stopAlarm() {
+        getParentStopAlarmMessage(object : ParentNotificationCallback {
+            override fun onNotificationReceived(parentRecord: ParentRecord?) {
+                if (parentRecord != null && parentRecord.read) {
+                    val intent = Intent(ACTION_ALARM_STOP)
+                    LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
+                }
+            }
+        })
     }
 
     private fun createNotificationChannel() {
@@ -244,5 +292,6 @@ class MotionAlarmNotification(private val context: Context) {
 
     companion object {
         const val KEY_TEXT_REPLY = "key_text_reply"
+        const val ACTION_ALARM_STOP = "com.example.antichild.ACTION_ALARM_STOPPED"
     }
 }

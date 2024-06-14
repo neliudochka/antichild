@@ -1,23 +1,25 @@
 package com.example.antichild
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.hardware.SensorManager
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import com.example.antichild.auth.LaunchFragment
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.antichild.databinding.FragmentMotionDetectionBinding
+import com.example.antichild.notification.MotionAlarmNotification
+import com.example.antichild.notification.NotificationService
 import com.example.antichild.sensors.AccelerometerSensor
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
-import java.util.Locale
+import com.example.antichild.utils.SharedPreferencesHelper
 import kotlin.math.sqrt
 import kotlin.properties.Delegates
-import android.content.Intent
-import com.example.antichild.notification.MotionAlarmNotification
-import com.example.antichild.utils.SharedPreferencesHelper
 
 class MotionDetectionFragment : Fragment() {
     private lateinit var binding: FragmentMotionDetectionBinding
@@ -32,9 +34,19 @@ class MotionDetectionFragment : Fragment() {
 
         motionAlarmNotification = MotionAlarmNotification(requireContext())
 
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(
+            alarmStopReceiver,
+            IntentFilter(MotionAlarmNotification.ACTION_ALARM_STOP)
+        )
+
         setButtonListeners()
 
         return binding.root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(alarmStopReceiver)
     }
 
     override fun onDestroy() {
@@ -59,6 +71,7 @@ class MotionDetectionFragment : Fragment() {
         binding.motionAlarmActivationButton.setBackgroundColor(red)
         binding.motionAlarmActivationButton.setOnClickListener {
             switchActivateStopButtons()
+            startNotificationService()
         }
 
         binding.stop.setBackgroundColor(red)
@@ -154,6 +167,34 @@ class MotionDetectionFragment : Fragment() {
     private fun stopMusicService() {
         activity?.stopService(Intent(context, MusicService::class.java))
     }
+
+    // receive stop notification from parent
+
+    private fun startNotificationService() {
+        val serviceIntent = Intent(requireContext(), NotificationService::class.java)
+        ContextCompat.startForegroundService(requireContext(), serviceIntent)
+    }
+
+    private fun stopNotificationService() {
+        val serviceIntent = Intent(requireContext(), NotificationService::class.java)
+        requireContext().stopService(serviceIntent)
+    }
+
+    private val alarmStopReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == MotionAlarmNotification.ACTION_ALARM_STOP) {
+                alarmStopReceived()
+            }
+        }
+    }
+
+    private fun alarmStopReceived() {
+        isStolen = false
+        stopMusicService()
+        stopNotificationService()
+        switchActivateStopButtons()
+    }
+
     companion object {
         @JvmStatic
         fun newInstance() = MotionDetectionFragment()

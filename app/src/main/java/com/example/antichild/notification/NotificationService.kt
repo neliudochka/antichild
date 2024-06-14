@@ -4,7 +4,6 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Handler
@@ -12,7 +11,6 @@ import android.os.IBinder
 import android.os.Looper
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import com.example.antichild.models.ChildRecord
 import com.example.antichild.utils.SharedPreferencesHelper
 
 class NotificationService : Service() {
@@ -47,10 +45,13 @@ class NotificationService : Service() {
     private fun checkForNotifications() {
         runnable = object : Runnable {
             override fun run() {
+                Log.d("NotificationService", "Checking for notifications")
                 val motionAlarmNotification = MotionAlarmNotification(this@NotificationService)
                 val userdata = SharedPreferencesHelper.getUserData()
                 if (userdata.role == "parent") {
                     motionAlarmNotification.getNotificationParent()
+                } else if (userdata.role == "child") {
+                    motionAlarmNotification.stopAlarm()
                 }
 
                 handler.postDelayed(this, 10000)
