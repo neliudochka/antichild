@@ -29,6 +29,21 @@ class ParentMotionDetectionFragment : Fragment() {
     private var isActivated = false
     private var red by Delegates.notNull<Int>()
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean("isActivated", isActivated)
+    }
+
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        super.onViewStateRestored(savedInstanceState)
+
+        if (savedInstanceState != null) {
+            isActivated = savedInstanceState.getBoolean("isActivated")
+            switchActivateStopButtons()
+        }
+    }
+
+
     private fun setButtonListeners() {
         red = requireContext().getColor(R.color.red)
 

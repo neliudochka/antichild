@@ -1,6 +1,9 @@
 package com.example.antichild
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.example.antichild.auth.LaunchFragment
 import com.example.antichild.databinding.ActivityMainBinding
@@ -19,24 +22,58 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         auth = Firebase.auth
-    }
 
-    public override fun onStart() {
-        super.onStart()
         val currentUser = auth.currentUser
 
         SharedPreferencesHelper.init(this)
 
-        if (currentUser != null) {
-            supportFragmentManager
-                .beginTransaction()
-                .replace(R.id.fragment_container, ToolsFragment.newInstance())
-                .commit()
-        } else {
-            supportFragmentManager
-                .beginTransaction()
-                .replace(R.id.fragment_container, LaunchFragment.newInstance())
-                .commit()
+        if (savedInstanceState == null) {
+            if (currentUser != null) {
+                supportFragmentManager
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, ToolsFragment.newInstance())
+                    .commit()
+            } else {
+                supportFragmentManager
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, LaunchFragment.newInstance())
+                    .commit()
+            }
+        }
+
+        handleIntent(intent)
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        intent?.let {
+            handleIntent(it)
+        }
+    }
+
+    private fun handleIntent(intent: Intent) {
+        val fragmentName = intent.getStringExtra("fragment")
+        if (fragmentName != null) {
+            openFragment(fragmentName)
+        }
+    }
+
+    private fun openFragment(fragment: String) {
+        Log.d("Please", ("ParentMotionDetectionFragment" == fragment).toString())
+        when (fragment) {
+            "ParentMotionDetectionFragment" -> {
+                supportFragmentManager
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, ParentMotionDetectionFragment())
+                    .commit()
+            }
+            "MotionDetectionFragment" -> {
+                supportFragmentManager
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, MotionDetectionFragment())
+                    .commit()
+            }
+            else -> return
         }
     }
 }
