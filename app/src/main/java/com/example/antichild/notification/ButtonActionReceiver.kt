@@ -9,15 +9,21 @@ import android.widget.Toast
 import com.example.antichild.utils.SharedPreferencesHelper
 
 class ButtonActionReceiver : BroadcastReceiver() {
+    private lateinit var motionAlarmNotification: MotionAlarmNotification
     override fun onReceive(context: Context?, intent: Intent?) {
         if (intent?.action == "com.example.antichild.ACTION_REPLY") {
             val remoteInput = RemoteInput.getResultsFromIntent(intent)
             val remoteText = remoteInput.getCharSequence(MotionAlarmNotification.KEY_TEXT_REPLY).toString()
 
             if (validatePassword(remoteText)) {
-                // send to child
+                val childUid = intent.getStringExtra("child_id")
+                motionAlarmNotification = MotionAlarmNotification(context!!)
 
-                val notificationManager = context?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                if (childUid != null) {
+                    motionAlarmNotification.createParentRecord(childUid)
+                }
+
+                val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 notificationManager.cancel(intent.getIntExtra("notification_id", 0))
             } else {
                 Toast.makeText(context, "Wrong password!", Toast.LENGTH_SHORT).show()

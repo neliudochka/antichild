@@ -143,6 +143,7 @@ class MotionAlarmNotification(private val context: Context) {
         val replyIntent = Intent(context, ButtonActionReceiver::class.java).apply {
             action = "com.example.antichild.ACTION_REPLY"
             putExtra("notification_id", childRecord.date.hashCode())
+            putExtra("child_id", childRecord.fromUid)
         }
 
         val replyPendingIntent = PendingIntent.getBroadcast(
@@ -190,12 +191,13 @@ class MotionAlarmNotification(private val context: Context) {
         })
     }
 
-    fun createParentRecord(parentRecord: ParentRecord, childUid: String) {
+    fun createParentRecord(childUid: String) {
         val currentUser = FirebaseAuth.getInstance().currentUser?.uid
+        val parentRecord = createParentRecordModel()
 
         val ref = FirebaseDatabase
             .getInstance()
-            .getReference("/activity/alarm/${currentUser}/${childUid}")
+            .getReference("/activity/alarm/${childUid}/${currentUser}")
             .push()
 
         ref.setValue(parentRecord)
@@ -205,6 +207,24 @@ class MotionAlarmNotification(private val context: Context) {
             .addOnFailureListener { e ->
                 Log.e("MotionRecordParent", "Error stopping alarm", e)
             }
+    }
+
+    interface ParentNotificationCallback {
+        fun onNotificationReceived(parentRecord: ParentRecord?)
+    }
+
+    private fun createParentRecordModel(): ParentRecord {
+        val uid = FirebaseAuth.getInstance().uid.toString()
+        val calendar = Calendar.getInstance()
+        val date = calendar.time
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        val formattedDate = dateFormat.format(date)
+
+        return ParentRecord(uid, formattedDate)
+    }
+
+    fun getParentStopAlarmMessage() {
+
     }
 
     private fun createNotificationChannel() {
