@@ -2,7 +2,6 @@ package com.example.antichild
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,23 +9,38 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.antichild.databinding.FragmentParentMotionDetectionBinding
 import com.example.antichild.notification.NotificationService
+import com.example.antichild.utils.SharedPreferencesHelper
 import kotlin.properties.Delegates
 
 class ParentMotionDetectionFragment : Fragment() {
     private lateinit var binding: FragmentParentMotionDetectionBinding
+    private var isActivated = false
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentParentMotionDetectionBinding.inflate(inflater, container, false)
 
+        initUI()
         setButtonListeners()
 
         return binding.root
     }
 
+    private fun initUI() {
+        isActivated = SharedPreferencesHelper.getParentButtonState()
+        if(!isActivated) {
+            binding.motionAlarmActivationButton.visibility = View.VISIBLE
+            binding.stop.visibility = View.INVISIBLE
+            binding.passwordEditText.visibility = View.INVISIBLE
+        } else {
+            binding.motionAlarmActivationButton.visibility = View.INVISIBLE
+            binding.stop.visibility = View.VISIBLE
+            binding.passwordEditText.visibility = View.VISIBLE
+        }
+    }
+
     //ui
-    private var isActivated = false
     private var red by Delegates.notNull<Int>()
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -90,6 +104,8 @@ class ParentMotionDetectionFragment : Fragment() {
             binding.stop.visibility = View.VISIBLE
             binding.passwordEditText.visibility = View.VISIBLE
         }
+
+        SharedPreferencesHelper.saveParentButtonState(isActivated)
     }
 
     companion object {

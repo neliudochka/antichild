@@ -17,6 +17,7 @@ object SharedPreferencesHelper {
     private const val KEY_PARENT_EMAIL = "parentEmail"
     private const val KEY_PARENT_ROLE = "parentRole"
     private const val KEY_PARENT_ACCESS_PASSWORD = "accessPassword"
+    private const val KEY_BUTTON_STATE = "isActivated"
 
     private lateinit var sharedPreferences: SharedPreferences
 
@@ -97,6 +98,17 @@ object SharedPreferencesHelper {
             clear()
             apply()
         }
+    }
+
+    fun saveParentButtonState(isButtonOn: Boolean) {
+        with(sharedPreferences.edit()) {
+            putBoolean(KEY_BUTTON_STATE, isButtonOn)
+            apply()
+        }
+    }
+
+    fun getParentButtonState(): Boolean {
+        return sharedPreferences.getBoolean(KEY_BUTTON_STATE, false)
     }
 }
 
