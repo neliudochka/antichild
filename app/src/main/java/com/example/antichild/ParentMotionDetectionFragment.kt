@@ -39,11 +39,9 @@ class ParentMotionDetectionFragment : Fragment() {
         if(!isActivated) {
             binding.motionAlarmActivationButton.visibility = View.VISIBLE
             binding.stop.visibility = View.INVISIBLE
-            binding.passwordEditText.visibility = View.INVISIBLE
         } else {
             binding.motionAlarmActivationButton.visibility = View.INVISIBLE
             binding.stop.visibility = View.VISIBLE
-            binding.passwordEditText.visibility = View.VISIBLE
         }
 
         val showPasswordDialog = arguments?.getBoolean("showPasswordDialog", false) ?: false
@@ -114,12 +112,6 @@ class ParentMotionDetectionFragment : Fragment() {
 
         binding.stop.setBackgroundColor(red)
         binding.stop.setOnClickListener{
-/*            if (binding.passwordEditText.text.toString() == SharedPreferencesHelper.getParentData().accessPassword) {
-                binding.movementDetectionTextview.text = resources.getText(R.string.no_movement_detected)
-                switchActivateStopButtons()
-            } else {
-                Toast.makeText(context, "Wrong password", Toast.LENGTH_SHORT).show()
-            }*/
             switchActivateStopButtons()
             stopNotificationService()
         }
@@ -141,13 +133,11 @@ class ParentMotionDetectionFragment : Fragment() {
             isActivated = false
             binding.motionAlarmActivationButton.visibility = View.VISIBLE
             binding.stop.visibility = View.INVISIBLE
-            binding.passwordEditText.visibility = View.INVISIBLE
         } else {
             //ввімкнути аларм на телефоні чайлда
             isActivated = true
             binding.motionAlarmActivationButton.visibility = View.INVISIBLE
             binding.stop.visibility = View.VISIBLE
-            binding.passwordEditText.visibility = View.VISIBLE
         }
 
         SharedPreferencesHelper.saveParentButtonState(isActivated)

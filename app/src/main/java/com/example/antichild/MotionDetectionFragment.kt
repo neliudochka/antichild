@@ -190,6 +190,7 @@ class MotionDetectionFragment : Fragment() {
 
     private fun alarmStopReceived() {
         isStolen = false
+        binding.movementDetectionTextview.text = resources.getText(R.string.no_movement_detected)
         stopMusicService()
         stopNotificationService()
         switchActivateStopButtons()
