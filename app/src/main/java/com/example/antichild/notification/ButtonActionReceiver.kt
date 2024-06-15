@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
+import com.example.antichild.MainActivity
 import com.example.antichild.utils.SharedPreferencesHelper
 
 class ButtonActionReceiver : BroadcastReceiver() {
@@ -22,12 +23,13 @@ class ButtonActionReceiver : BroadcastReceiver() {
                 if (childUid != null) {
                     motionAlarmNotification.createParentRecord(childUid)
                 }
-
-                val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                notificationManager.cancel(intent.getIntExtra("notification_id", 0))
             } else {
                 Toast.makeText(context, "Wrong password!", Toast.LENGTH_SHORT).show()
+                openFragment(context, "ParentMotionDetectionFragment")
             }
+
+            val notificationManager = context?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.cancel(intent.getIntExtra("notification_id", 0))
         }
     }
 
@@ -35,5 +37,15 @@ class ButtonActionReceiver : BroadcastReceiver() {
         return if (password.isEmpty()) {
             false
         } else password == SharedPreferencesHelper.getParentData().accessPassword
+    }
+
+    private fun openFragment(context: Context?, fragmentName: String) {
+        if (context != null) {
+            val intent = Intent(context, MainActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                putExtra("fragment", fragmentName)
+            }
+            context.startActivity(intent)
+        }
     }
 }
