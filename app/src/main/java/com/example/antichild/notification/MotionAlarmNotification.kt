@@ -129,6 +129,7 @@ class MotionAlarmNotification(private val context: Context) {
         val intent = Intent(context, MainActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             putExtra("fragment", "ParentMotionDetectionFragment")
+            putExtra("showPasswordDialog", true)
         }
 
         val pendingIntent = PendingIntent.getActivity(
@@ -202,6 +203,12 @@ class MotionAlarmNotification(private val context: Context) {
             override fun onNotificationReceived(childRecord: ChildRecord?) {
                 if (childRecord != null) {
                     createNotification(childRecord)
+                    val intent = Intent(context, MainActivity::class.java).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                        putExtra("fragment", "ParentMotionDetectionFragment")
+                        putExtra("showPasswordDialog", true)
+                    }
+                    context.startActivity(intent)
                 } else {
                     Log.d("MotionAlarmNotification", "No notification data available")
                 }

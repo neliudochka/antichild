@@ -15,9 +15,10 @@ class ButtonActionReceiver : BroadcastReceiver() {
         if (intent?.action == MotionAlarmNotification.ACTION_REPLY) {
             val remoteInput = RemoteInput.getResultsFromIntent(intent)
             val remoteText = remoteInput.getCharSequence(MotionAlarmNotification.KEY_TEXT_REPLY).toString()
+            val childUid = intent.getStringExtra("child_id")
+            SharedPreferencesHelper.saveCurrentChild(childUid!!)
 
             if (validatePassword(remoteText)) {
-                val childUid = intent.getStringExtra("child_id")
                 motionAlarmNotification = MotionAlarmNotification(context!!)
 
                 if (childUid != null) {
@@ -25,7 +26,7 @@ class ButtonActionReceiver : BroadcastReceiver() {
                 }
             } else {
                 Toast.makeText(context, "Wrong password!", Toast.LENGTH_SHORT).show()
-                openFragment(context, "ParentMotionDetectionFragment")
+                openFragment(context, "ParentMotionDetectionFragment", true)
             }
 
             val notificationManager = context?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -42,11 +43,12 @@ class ButtonActionReceiver : BroadcastReceiver() {
         } else password == SharedPreferencesHelper.getParentData().accessPassword
     }
 
-    private fun openFragment(context: Context?, fragmentName: String) {
+    private fun openFragment(context: Context?, fragmentName: String, showPasswordDialog: Boolean) {
         if (context != null) {
             val intent = Intent(context, MainActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 putExtra("fragment", fragmentName)
+                putExtra("showPasswordDialog", showPasswordDialog)
             }
             context.startActivity(intent)
         }

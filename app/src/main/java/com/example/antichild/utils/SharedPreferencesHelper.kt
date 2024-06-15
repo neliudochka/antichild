@@ -18,6 +18,7 @@ object SharedPreferencesHelper {
     private const val KEY_PARENT_ROLE = "parentRole"
     private const val KEY_PARENT_ACCESS_PASSWORD = "accessPassword"
     private const val KEY_BUTTON_STATE = "isActivated"
+    private const val CHILD_UID_DIALOG = "childUidDialog"
 
     private lateinit var sharedPreferences: SharedPreferences
 
@@ -109,6 +110,17 @@ object SharedPreferencesHelper {
 
     fun getParentButtonState(): Boolean {
         return sharedPreferences.getBoolean(KEY_BUTTON_STATE, false)
+    }
+
+    fun saveCurrentChild(childUid: String) {
+        with(sharedPreferences.edit()) {
+            putString(CHILD_UID_DIALOG, childUid)
+            apply()
+        }
+    }
+
+    fun getCurrentChild(): String? {
+        return sharedPreferences.getString(CHILD_UID_DIALOG,null)
     }
 }
 

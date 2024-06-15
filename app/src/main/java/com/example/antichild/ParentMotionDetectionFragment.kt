@@ -2,18 +2,24 @@ package com.example.antichild
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.antichild.databinding.FragmentParentMotionDetectionBinding
+import com.example.antichild.notification.MotionAlarmNotification
 import com.example.antichild.notification.NotificationService
 import com.example.antichild.utils.SharedPreferencesHelper
 import kotlin.properties.Delegates
 
 class ParentMotionDetectionFragment : Fragment() {
     private lateinit var binding: FragmentParentMotionDetectionBinding
+    private lateinit var motionAlarmNotification: MotionAlarmNotification
     private var isActivated = false
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -21,6 +27,7 @@ class ParentMotionDetectionFragment : Fragment() {
     ): View {
         binding = FragmentParentMotionDetectionBinding.inflate(inflater, container, false)
 
+        motionAlarmNotification = MotionAlarmNotification(requireContext())
         initUI()
         setButtonListeners()
 
@@ -38,6 +45,44 @@ class ParentMotionDetectionFragment : Fragment() {
             binding.stop.visibility = View.VISIBLE
             binding.passwordEditText.visibility = View.VISIBLE
         }
+
+        val showPasswordDialog = arguments?.getBoolean("showPasswordDialog", false) ?: false
+        if (showPasswordDialog) {
+            Log.d("ParentMotionDetectionFragment", showPasswordDialog.toString())
+            showPasswordPrompt()
+        }
+    }
+
+    private fun showPasswordPrompt() {
+        val context = requireContext()
+        val builder = AlertDialog.Builder(context)
+        val inflater = LayoutInflater.from(context)
+        val view = inflater.inflate(R.layout.dialog_password, null)
+
+        builder.setView(view)
+            .setPositiveButton("OK") { dialog, _ ->
+                val passwordEditText = view.findViewById<EditText>(R.id.passwordEditText)
+                val password = passwordEditText.text.toString()
+                Log.d("ParentMotionDetectionFragment", password)
+                if (validatePassword(password)) {
+                    val childUid = SharedPreferencesHelper.getCurrentChild()
+                    motionAlarmNotification.createParentRecord(childUid!!)
+                } else {
+                    Toast.makeText(context, "Wrong password!", Toast.LENGTH_SHORT).show()
+                }
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .create()
+            .show()
+    }
+
+    private fun validatePassword(password: String): Boolean {
+        return if (password.isEmpty()) {
+            false
+        } else password == SharedPreferencesHelper.getParentData().accessPassword
     }
 
     //ui
@@ -110,6 +155,10 @@ class ParentMotionDetectionFragment : Fragment() {
 
     companion object {
             @JvmStatic
-            fun newInstance() = ParentMotionDetectionFragment()
+            fun newInstance(showPasswordDialog: Boolean = false) = ParentMotionDetectionFragment().apply {
+                arguments = Bundle().apply {
+                    putBoolean("showPasswordDialog", showPasswordDialog)
+                }
+            }
         }
 }

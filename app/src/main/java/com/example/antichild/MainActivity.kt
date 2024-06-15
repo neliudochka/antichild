@@ -1,6 +1,5 @@
 package com.example.antichild
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -53,18 +52,19 @@ class MainActivity : AppCompatActivity() {
 
     private fun handleIntent(intent: Intent) {
         val fragmentName = intent.getStringExtra("fragment")
+        val showPasswordDialog = intent.getBooleanExtra("showPasswordDialog", false)
         if (fragmentName != null) {
-            openFragment(fragmentName)
+            openFragment(fragmentName, showPasswordDialog)
         }
     }
 
-    private fun openFragment(fragment: String) {
+    private fun openFragment(fragment: String, showPasswordDialog: Boolean) {
         Log.d("Please", ("ParentMotionDetectionFragment" == fragment).toString())
         when (fragment) {
             "ParentMotionDetectionFragment" -> {
                 supportFragmentManager
                     .beginTransaction()
-                    .replace(R.id.fragment_container, ParentMotionDetectionFragment())
+                    .replace(R.id.fragment_container, ParentMotionDetectionFragment.newInstance(showPasswordDialog))
                     .commit()
             }
             "MotionDetectionFragment" -> {
