@@ -30,6 +30,9 @@ class ButtonActionReceiver : BroadcastReceiver() {
 
             val notificationManager = context?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.cancel(intent.getIntExtra("notification_id", 0))
+        } else if (intent?.action == MotionAlarmNotification.ACTION_READ) {
+            val notificationManager = context?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.cancel(intent.getIntExtra("notification_id", 0))
         }
     }
 

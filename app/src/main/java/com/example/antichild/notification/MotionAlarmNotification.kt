@@ -151,11 +151,27 @@ class MotionAlarmNotification(private val context: Context) {
             context, 0, replyIntent, PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        val action = NotificationCompat.Action.Builder(
+        val actionTurnOff = NotificationCompat.Action.Builder(
             android.R.drawable.ic_input_add,
             "Turn off",
             replyPendingIntent
         ).addRemoteInput(remoteInput).build()
+
+        val readIntent = Intent(context, ButtonActionReceiver::class.java).apply {
+            action = ACTION_READ
+            putExtra("notification_id", childRecord.date.hashCode())
+            putExtra("child_id", childRecord.fromUid)
+        }
+
+        val readPendingIntent = PendingIntent.getBroadcast(
+            context, 0, readIntent, PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val actionRead = NotificationCompat.Action.Builder(
+            android.R.drawable.ic_input_add,
+            "Read",
+            readPendingIntent
+        ).build()
 
         val channelId = "Default"
         val notificationBuilder = NotificationCompat.Builder(context, channelId)
@@ -164,7 +180,8 @@ class MotionAlarmNotification(private val context: Context) {
             .setContentText(childRecord.body)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
-            .addAction(action)
+            .addAction(actionTurnOff)
+            .addAction(actionRead)
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -294,5 +311,6 @@ class MotionAlarmNotification(private val context: Context) {
         const val KEY_TEXT_REPLY = "key_text_reply"
         const val ACTION_REPLY = "com.example.antichild.ACTION_REPLY"
         const val ACTION_ALARM_STOP = "com.example.antichild.ACTION_ALARM_STOPPED"
+        const val ACTION_READ = "com.example.antichild.ACTION_READ"
     }
 }
