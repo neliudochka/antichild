@@ -46,7 +46,6 @@ class ParentMotionDetectionFragment : Fragment() {
 
         val showPasswordDialog = arguments?.getBoolean("showPasswordDialog", false) ?: false
         if (showPasswordDialog) {
-            Log.d("ParentMotionDetectionFragment", showPasswordDialog.toString())
             showPasswordPrompt()
         }
     }
@@ -58,23 +57,28 @@ class ParentMotionDetectionFragment : Fragment() {
         val view = inflater.inflate(R.layout.dialog_password, null)
 
         builder.setView(view)
-            .setPositiveButton("OK") { dialog, _ ->
-                val passwordEditText = view.findViewById<EditText>(R.id.passwordEditText)
-                val password = passwordEditText.text.toString()
-                Log.d("ParentMotionDetectionFragment", password)
-                if (validatePassword(password)) {
-                    val childUid = SharedPreferencesHelper.getCurrentChild()
-                    motionAlarmNotification.createParentRecord(childUid!!)
-                } else {
-                    Toast.makeText(context, "Wrong password!", Toast.LENGTH_SHORT).show()
-                }
-                dialog.dismiss()
-            }
+            .setPositiveButton("OK", null)
             .setNegativeButton("Cancel") { dialog, _ ->
                 dialog.dismiss()
             }
-            .create()
-            .show()
+
+        val dialog = builder.create()
+        dialog.show()
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+            val passwordEditText = view.findViewById<EditText>(R.id.passwordEditText)
+            val password = passwordEditText.text.toString()
+            Log.d("ParentMotionDetectionFragment", password)
+            if (validatePassword(password)) {
+                val childUid = SharedPreferencesHelper.getCurrentChild()
+                if (childUid != null) {
+                    motionAlarmNotification.createParentRecord(childUid)
+                }
+                dialog.dismiss()
+            } else {
+                Toast.makeText(context, "Wrong password!", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun validatePassword(password: String): Boolean {
