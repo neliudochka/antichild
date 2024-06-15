@@ -11,7 +11,7 @@ import com.example.antichild.utils.SharedPreferencesHelper
 class ButtonActionReceiver : BroadcastReceiver() {
     private lateinit var motionAlarmNotification: MotionAlarmNotification
     override fun onReceive(context: Context?, intent: Intent?) {
-        if (intent?.action == "com.example.antichild.ACTION_REPLY") {
+        if (intent?.action == MotionAlarmNotification.ACTION_REPLY) {
             val remoteInput = RemoteInput.getResultsFromIntent(intent)
             val remoteText = remoteInput.getCharSequence(MotionAlarmNotification.KEY_TEXT_REPLY).toString()
 

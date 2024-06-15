@@ -142,7 +142,7 @@ class MotionAlarmNotification(private val context: Context) {
         }
 
         val replyIntent = Intent(context, ButtonActionReceiver::class.java).apply {
-            action = "com.example.antichild.ACTION_REPLY"
+            action = ACTION_REPLY
             putExtra("notification_id", childRecord.date.hashCode())
             putExtra("child_id", childRecord.fromUid)
         }
@@ -292,6 +292,7 @@ class MotionAlarmNotification(private val context: Context) {
 
     companion object {
         const val KEY_TEXT_REPLY = "key_text_reply"
+        const val ACTION_REPLY = "com.example.antichild.ACTION_REPLY"
         const val ACTION_ALARM_STOP = "com.example.antichild.ACTION_ALARM_STOPPED"
     }
 }
