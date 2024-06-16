@@ -44,13 +44,6 @@ class MessagingService: FirebaseMessagingService() {
             this, 0, intent, PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val buttonIntent = Intent(this, ButtonActionReceiver::class.java).apply {
-            action = "com.example.antichild.ACTION_BUTTON"
-        }
-        val buttonPendingIntent = PendingIntent.getBroadcast(
-            this, 0, buttonIntent, PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
-        )
-
         val channelId = "Default"
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(android.R.drawable.ic_dialog_email)
@@ -58,7 +51,6 @@ class MessagingService: FirebaseMessagingService() {
             .setContentText(text)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
-            .addAction(android.R.drawable.ic_input_add, "Turn off", buttonPendingIntent)
 
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 

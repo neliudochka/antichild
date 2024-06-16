@@ -1,21 +1,22 @@
 package com.example.antichild
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import com.example.antichild.auth.LaunchFragment
 import com.example.antichild.databinding.FragmentToolsBinding
-import com.example.antichild.models.Parent
+import com.example.antichild.notification.NotificationService
 import com.example.antichild.utils.SharedPreferencesHelper
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 
 class ToolsFragment : Fragment() {
-    lateinit var binding: FragmentToolsBinding
+    private lateinit var binding: FragmentToolsBinding
     private lateinit var auth: FirebaseAuth
 
     override fun onCreateView(
@@ -60,11 +61,17 @@ class ToolsFragment : Fragment() {
         binding.logout.setOnClickListener {
             Firebase.auth.signOut()
             SharedPreferencesHelper.clearUserData()
+            stopNotificationService()
             parentFragmentManager
                 .beginTransaction()
                 .replace(R.id.fragment_container, LaunchFragment.newInstance())
                 .commit()
         }
+    }
+
+    private fun stopNotificationService() {
+        val serviceIntent = Intent(requireContext(), NotificationService::class.java)
+        requireContext().stopService(serviceIntent)
     }
 
     companion object {
