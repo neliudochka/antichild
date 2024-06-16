@@ -1,6 +1,7 @@
 # AntiChild - Android App
 
-Child control app
+Child control app.
+Application is divided into two different apps: for parent and for child. The parent application features a button that activates listening to notifications about child's activity. The child's application includes a motion detection alarm. When activated, this alarm detects device motion, triggers an alarm and simultaneously sends notification to the parent's app. The alarm can be deactivated by entering a specific password either in the parent's application or directly in the child's application.
 
 ## Features
 - Motion detection alarm
@@ -21,6 +22,9 @@ Child control app
   - NotificationChannel & NotificationManager & NotificationCompat
   - PendingIntent
   - AudioAttributes
+  - BroadcastReceiver
+  - Firebase
+  - FCM
 
 ## Installation
 
