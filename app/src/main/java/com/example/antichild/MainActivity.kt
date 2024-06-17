@@ -1,130 +1,79 @@
 package com.example.antichild
 
-import android.annotation.SuppressLint
-import android.hardware.SensorManager
-import androidx.appcompat.app.AppCompatActivity
+import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
+import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
+import com.example.antichild.auth.LaunchFragment
 import com.example.antichild.databinding.ActivityMainBinding
-import com.example.antichild.sensors.AccelerometerSensor
-import kotlin.math.sqrt
-import kotlin.properties.Delegates
+import com.example.antichild.utils.SharedPreferencesHelper
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private lateinit var accelerometerSensor: AccelerometerSensor
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setButtonListeners()
-    }
+        auth = Firebase.auth
 
-    override fun onDestroy() {
-        killSensors()
-        super.onDestroy()
-    }
+        val currentUser = auth.currentUser
 
-    //ui
-    private var isActivated = false;
-    private var isSensors = false;
-    private var greyColor by Delegates.notNull<Int>()
-    private var pinky by Delegates.notNull<Int>()
-    private var red by Delegates.notNull<Int>()
+        SharedPreferencesHelper.init(this)
 
-    fun setButtonListeners() {
-        greyColor = applicationContext.getColor(R.color.gray)
-        pinky = applicationContext.getColor(R.color.pinky)
-        red = applicationContext.getColor(R.color.red)
-
-        binding.startButton.setBackgroundColor(greyColor)
-        binding.startButton.setOnClickListener {
-            if (!isStolen)
-                if(isSensors)
-                    switchActivatedButton()
-                else
-                    Toast.makeText(this, "Firstly, turn on the sensors", Toast.LENGTH_SHORT).show()
-        }
-
-        binding.onOffSensors.setBackgroundColor(greyColor)
-        binding.onOffSensors.setOnClickListener {
-            if (!isStolen)
-                switchOffSensors()
-        }
-
-        binding.reset.setBackgroundColor(red)
-        binding.reset.setOnClickListener{
-            isStolen = false
-            binding.movementDetectionTextview.text = "No movement detected"
-        }
-    }
-
-    private fun switchActivatedButton() {
-        if(isActivated) {
-            isActivated = false
-            binding.startButton.setBackgroundColor(greyColor)
-        } else {
-            isActivated = true
-            binding.startButton.setBackgroundColor(pinky)
-        }
-    }
-    private fun switchOffSensors() {
-        if(isSensors) {
-            isSensors = false
-            binding.onOffSensors.setBackgroundColor(greyColor)
-            killSensors()
-        } else {
-            isSensors = true
-            binding.onOffSensors.setBackgroundColor(pinky)
-            initSensors()
-        }
-    }
-
-    //функції роботи з сенсором
-    private fun initSensors() {
-        accelerometerSensor = AccelerometerSensor(applicationContext)
-        startAccelerometer()
-    }
-
-    private fun startAccelerometer() {
-        accelerometerSensor.startListening()
-        accelerometerSensor.setOnSensorValuesChangedListener { a ->
-            val result: String? = java.lang.String.format("x: %.4f   y: %.4f   z: %.4f", a[0], a[1], a[2])
-            binding.accRes.text = result
-            if(isActivated && !isStolen) {
-                checkMotion(a.toList())
+        if (savedInstanceState == null) {
+            if (currentUser != null) {
+                supportFragmentManager
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, ToolsFragment.newInstance())
+                    .commit()
+            } else {
+                supportFragmentManager
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, LaunchFragment.newInstance())
+                    .commit()
             }
         }
+
+        handleIntent(intent)
     }
 
-    private fun killSensors() {
-        accelerometerSensor.stopListening()
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        intent?.let {
+            handleIntent(it)
+        }
     }
 
+    private fun handleIntent(intent: Intent) {
+        val fragmentName = intent.getStringExtra("fragment")
+        val showPasswordDialog = intent.getBooleanExtra("showPasswordDialog", false)
+        if (fragmentName != null) {
+            openFragment(fragmentName, showPasswordDialog)
+        }
+    }
 
-    //Movement detection
-    private var mAccel = 0.00f;
-    private var mAccelCurrent = SensorManager.GRAVITY_EARTH;
-    private var mAccelLast = SensorManager.GRAVITY_EARTH;
-
-    private var isStolen = false
-
-    private fun checkMotion(values: List<Float>) {
-        val x: Float = values[0]
-        val y: Float = values[1]
-        val z: Float = values[2]
-        mAccelLast = mAccelCurrent
-        //загальна велечина прискорення =  √x^2+y^2+z^2
-        mAccelCurrent = sqrt(((x * x + y * y + z * z).toDouble())).toFloat()
-        val delta: Float = mAccelLast - mAccelCurrent
-        mAccel = mAccel * 0.9f + delta
-        if (mAccel > 0.5) {
-            isStolen = true
-            binding.movementDetectionTextview.text = "Movement detected"
-            switchOffSensors()
-            switchActivatedButton()
+    private fun openFragment(fragment: String, showPasswordDialog: Boolean) {
+        Log.d("Please", ("ParentMotionDetectionFragment" == fragment).toString())
+        when (fragment) {
+            "ParentMotionDetectionFragment" -> {
+                supportFragmentManager
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, ParentMotionDetectionFragment.newInstance(showPasswordDialog))
+                    .commit()
+            }
+            "MotionDetectionFragment" -> {
+                supportFragmentManager
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, MotionDetectionFragment())
+                    .commit()
+            }
+            else -> return
         }
     }
 }

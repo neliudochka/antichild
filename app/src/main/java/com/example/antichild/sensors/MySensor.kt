@@ -8,7 +8,7 @@ import android.hardware.SensorManager
 
 abstract class MySensor(
     private val context: Context,
-    private val sensorFeature: String,
+    sensorFeature: String,
     val sensorType: Int
 ): SensorEventListener {
     private val doesSensorExist: Boolean = context.packageManager.hasSystemFeature(sensorFeature)
